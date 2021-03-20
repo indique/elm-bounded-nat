@@ -171,6 +171,6 @@ safeFactorial =
   rgb : Nat (In redMin Nat100) --...
   ```
 
-Take a look at [`elm-bounded-array`][bounded-array] to see `Nat.In` in action!
+Take a look at [`elm-bounded-array`][bounded-array] to see a lot of this in action!
 
 [bounded-array]: https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/
