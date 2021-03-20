@@ -13,8 +13,6 @@
             "elm/file": "1.0.5",
             "elm/html": "1.0.0",
             "elm/time": "1.0.0",
-            "indique/elm-n-nat-type": "5.0.0",
-            "indique/elm-n-type": "1.0.0",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-syntax-highlight": "3.4.0",
             "the-sett/elm-syntax-dsl": "5.2.0"
