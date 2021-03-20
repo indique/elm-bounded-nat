@@ -1,6 +1,10 @@
 module GenerateForElmBoundedNat exposing (main)
 
-{-| Helps you generate the source code of all contained modules.
+{-| Helps you generate the source code of the modules
+- [`Nat.N`](Nat-N)
+- [`Nat.N.Type`](Nat-N-Type)
+
+Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 -}
 
 import Browser
@@ -373,7 +377,7 @@ natNTypeModule =
                     , markdown "- Describe an exact value"
                     , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
                     , markdown "    - `takesOnlyExact1 (nat10 |> Nat.In.n)` is a compile-time error"
-                    , markdown "- Adding a fixed value"
+                    , markdown "- Add a fixed value"
                     , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
                     , markdown "    - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`"
                     , markdown "### about a big limitation"
