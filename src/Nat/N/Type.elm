@@ -62,7 +62,7 @@ module Nat.N.Type exposing
 
       - `takesOnlyExact1 (nat10 |> Nat.In.n)` is a compile-time error
 
-  - Adding a fixed value
+  - Add a fixed value
 
         add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))
 
