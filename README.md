@@ -6,9 +6,9 @@ Current attempts of represening natural numbers `>= 0` only have quite lose prom
 
 This package contains many ways to ensure that a `Nat` is in a range _at compile-time_.
 
-- `Min` only knows what a nat at least is:  `⨯[✓✓✓✓✓✓✓...`
-- `In` knows the range a nat is in:  `⨯⨯[✓✓✓]⨯⨯...`
-- `N` & `Only`, knows the _actual value_: `⨯✓⨯⨯⨯⨯...`
+- `Min` knows what a minimum value:  `⨯[✓✓✓✓✓✓✓...`
+- `In` knows the range it's in:  `⨯⨯[✓✓✓]⨯⨯...`
+- `N` & `Only`, know the _actual value_: `⨯✓⨯⨯⨯⨯...`
 
 Setup
 
