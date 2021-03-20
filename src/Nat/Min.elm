@@ -1,5 +1,6 @@
 module Nat.Min exposing
-    ( atMost, abs, intAtLeast
+    ( abs
+    , atMost, intAtLeast, atLeast
     , isIntAtLeast, is, isAtLeast, isAtMost, theGreater, theSmaller
     , n, lowerMin
     , addN, subN, add, subIn, mul, div, remainderBy, toPower
@@ -11,7 +12,12 @@ module Nat.Min exposing
 
 ## add information
 
-@docs atMost, abs, intAtLeast
+@docs abs
+
+
+## clamp
+
+@docs atMost, intAtLeast, atLeast
 
 
 ### compare
@@ -72,18 +78,45 @@ lowerMin lower =
 
 
 {-| **Cap** the `Nat (Min ...)` to at most a upper limit.
+
+    atMost5 : Nat (Min min) -> Nat (Min Nat5)
+    atMost5 =
+        Nat.Min.lowerMin nat0
+            >> Nat.Min.atMost (nat5 |> Nat.Min.n) { min = nat0 }
+
+    atMost5 (nat12 |> Nat.Min.n) --> Nat 5
+    atMost5 (nat3 |> Nat.Min.n) --> Nat 3
+
 -}
 atMost :
     Nat (N max Is (Difference a To maxPlusA))
     -> { min : Nat (N min Is (Difference range To max)) }
     -> Nat (Min min)
     -> Nat (In min maxPlusA)
-atMost max min =
-    isAtMost max
+atMost upperLimit min =
+    isAtMost upperLimit
         min
-        { greater = \_ -> max |> toInt |> Internal.Nat
+        { greater = \_ -> upperLimit |> Internal.newRange
         , equalOrLess = identity
         }
+
+
+{-| If the `Nat (Min ...)` is lower than a lower limit, return the lower limit instead.
+
+    atLeast5 : Nat (Min min) -> Nat (Min Nat5)
+    atLeast5 =
+        Nat.Min.atLeast (nat5 |> Nat.Min.n)
+
+    atLeast5 (nat3 |> Nat.Min.n) --> Nat 5
+    atLeast5 (nat12 |> Nat.Min.n) --> Nat 12
+
+-}
+atLeast :
+    Nat (Only newMin)
+    -> Nat (Min min)
+    -> Nat (Min newMin)
+atLeast lowerLimit =
+    toInt >> max (toInt lowerLimit) >> Internal.Nat
 
 
 {-| The absolute value of an `Int`, which is at least `Nat0`.
@@ -102,7 +135,7 @@ Really only use this if you want the absolute value.
             (\_ -> Nat.Min.addN nat1 >> Nat.Min.lowerMin nat0)
             (Nat.Min.n nat0)
 
-If something like this isn't possible, use `[Nat.Min.intAtLeast][Nat.Min#intAtLeast] nat0`!
+If something like this isn't possible, use [`Nat.Min.intAtLeast`](Nat-Min#intAtLeast)`nat0`!
 
 -}
 abs : Int -> Nat (Min Nat0)
@@ -141,7 +174,7 @@ But avoid it if you can do better, like
             (\_ -> Nat.Min.addN nat1 >> Nat.Min.lowerMin nat0)
             (Nat.Min.n nat0)
 
-If you want to handle the case `< minimum` yourself, use [`Nat.Min.isIntAtLeast`][Nat.Min#isIntAtLeast].
+If you want to handle the case `< minimum` yourself, use [`Nat.Min.isIntAtLeast`](Nat-Min#isIntAtLeast).
 
 -}
 intAtLeast : Nat (N n Is difference) -> Int -> Nat (Min n)
@@ -356,7 +389,7 @@ isAtLeast triedLowerLimit min cases =
             .equalOrGreater cases (Internal.newRange minNat)
 
         else
-            .less cases (toInt minNat |> Internal.Nat)
+            .less cases (minNat |> Internal.newRange)
 
 
 {-| Is the `Nat.Min`
@@ -384,7 +417,7 @@ isAtMost triedUpperLimit min cases =
             .greater cases (Internal.newRange minNat)
 
 
-{-| The greater of 2 `Nat.Min`s. Works just like [Basics.max][Basics#max].
+{-| The greater of 2 `Nat.Min`s. Works just like [Basics.max](Basics#max).
 
     Nat.Min.theGreater
         (nat3 |> Nat.Min.n)
@@ -398,7 +431,7 @@ theGreater a b =
         |> Internal.Nat
 
 
-{-| The smaller of 2 `Nat.Min`s. Works just like [Basics.min][Basics#min].
+{-| The smaller of 2 `Nat.Min`s. Works just like [Basics.min](Basics#min).
 
     Nat.Min.theSmaller
         (nat3 |> Nat.Min.n)

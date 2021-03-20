@@ -276,6 +276,7 @@ natNModule =
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
+                    , markdown "See [Nat.Bound.N](Nat-Bound#N) for a detailed explanation."
                     , docTagsFrom NatNValue declarations
                     ]
             }
@@ -368,8 +369,20 @@ natNTypeModule =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown "Represent natural numbers within a type."
-                    , markdown "See the readme for more information."
+                    [ markdown "Express exact numbers in the type."
+                    , markdown "- Describe an exact value"
+                    , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
+                    , markdown "    - `takesOnlyExact1 (nat10 |> Nat.In.n)` is a compile-time error"
+                    , markdown "- Adding a fixed value"
+                    , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
+                    , markdown "    - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`"
+                    , markdown "### about a big limitation"
+                    , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
+                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) Is difference)"
+                    , markdown "If a type alias is not fully expanded after _192_ tries, there seems to be a hard limit"
+                    , markdown "- the compilation stops"
+                    , markdown "- the elm-stuff can corrupt"
+                    , markdown "This is really a factor holding this package down."
                     , markdown "## at least"
                     , docTagsFrom NatNTypeAtLeast declarations
                     , markdown "## exact"

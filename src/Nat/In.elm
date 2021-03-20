@@ -26,7 +26,7 @@ module Nat.In exposing
 
 @docs addN, subN, add, sub, div, remainderBy
 
-If you want other operations like multiply, use [dropMax][Nat.In#dropMax].
+If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 
 
 ## drop information
@@ -66,7 +66,7 @@ import Random
 99 |> Nat.In.intInRange nat3 nat12 --> Nat.In 12
 ```
 
-If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIntInRange`][Nat.In#isIntInRange]
+If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIntInRange`](Nat-In#isIntInRange)
 
 -}
 intInRange :

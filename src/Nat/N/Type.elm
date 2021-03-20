@@ -64,11 +64,9 @@ module Nat.N.Type exposing
 
   - Adding a fixed value
 
-        next2Bigger : Nat (Only n) -> Nat (Only (Nat2Plus n)) -> Cake
+        add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))
 
-      - `next2Bigger (nat0 |> Nat.In) (nat1 |> Nat.In.n)` is a compile-time-error
-      - `next2Bigger (nat0 |> Nat.In) (nat3 |> Nat.In.n)` is a compile-time-error
-      - `next2Bigger (nat2 |> Nat.In) (nat4 |> Nat.In.n)` works
+      - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`
 
 
 ### about a big limitation

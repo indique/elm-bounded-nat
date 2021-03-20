@@ -52,7 +52,7 @@ type Min minimum
 
 {-| `In minimum maximum`: Somewhere within a minimum & maximum.
 
-       ↓ minimum    ↓ maximum
+       ↓ minimum   ↓ maximum
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
 
 Note: maximum >= minimum for every existing `Nat (In ...)`:
@@ -142,7 +142,7 @@ It is also used to describe a difference between two values.
 
 → because `range` is 0 or positive, `last` must also be at least as high as `first`.
 
-If you only want to ensure that it is within a minimum (& maximum), [`Min`][Nat#Min] or [`In`][Nat#In] is the right choice!
+If you only want to ensure that it is within a minimum (& maximum), [`Min`](Nat-Bound#Min) or [`In`](Nat-Bound#In) is the right choice!
 This is most of the time the better choice for calculations.
 
 -}
