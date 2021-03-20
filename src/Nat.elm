@@ -28,7 +28,7 @@ import Internal
     -- = 3
     Nat (Only Nat3)
 
-    -- = 3, & 3, describes as a difference
+    -- = 3, & 3, described as a difference
     Nat (N Nat3 Is (Difference a To (Nat3Plus a)))
 
     -- either one of the above
