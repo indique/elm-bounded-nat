@@ -22,7 +22,8 @@ import Nat.Bound exposing (..)
     --In, Min, Only, N, Difference, Is, To
 import Nat.Min
 import Nat.In
-import Nat.N exposing (..) --nat0 to nat192
+import Nat.N
+import Nat.Ns exposing (..) --nat0 to nat192
 
 import Nat.N.Type exposing (..)
     --Nat0 to Nat192 & Nat0Plus to Nat192Plus
@@ -129,7 +130,7 @@ factorial =
     Nat.Min.lowerMin nat0 >> factorialHelp
 ```
 
-→ `factorial (Nat.Min.n nat4) |> Nat.Min.toInt --> 24`
+→ `factorial (Nat.Min.n nat4) |> Nat.toInt --> 24`
 
 → There is no way to put a negative number in.
 
@@ -139,7 +140,7 @@ We can do even better!
 We know that `!19` is already bigger than the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : Nat (In min N18Nat) -> Nat (Min Nat1)
+safeFactorial : Nat (In min Nat18) -> Nat (Min Nat1)
 safeFactorial =
     Nat.Min.fromIn >> factorial
 ```

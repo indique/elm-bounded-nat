@@ -8,8 +8,8 @@ import Nat exposing (Nat)
 import Nat.Bound exposing (In, Min, N)
 import Nat.In
 import Nat.Min
-import Nat.N exposing (..)
 import Nat.N.Type exposing (..)
+import Nat.Ns exposing (..)
 import Test exposing (Test, describe, test)
 
 

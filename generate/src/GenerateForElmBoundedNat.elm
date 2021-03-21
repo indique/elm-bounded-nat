@@ -99,7 +99,7 @@ main =
 
 
 type alias Model =
-    { natNModuleShownOrFolded :
+    { natNsModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
     , natNTypeModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
@@ -114,8 +114,8 @@ type ShownOrFolded content
 
 --tags
 
-type NatNTag =
-    NatNValue
+type NatNsTag =
+    NatNsValue
 
 type NatNTypeTag
     = NatNTypeExact
@@ -126,7 +126,7 @@ type NatNTypeTag
 
 init : ( Model, Cmd Msg )
 init =
-    ( { natNModuleShownOrFolded = Folded
+    ( { natNsModuleShownOrFolded = Folded
       , natNTypeModuleShownOrFolded = Folded
       }
     , Cmd.none
@@ -140,7 +140,7 @@ type Msg
 
 
 type ModulesInElmNArrays
-    = NatN
+    = NatNs
     | NatNType
 
 
@@ -170,7 +170,7 @@ update msg model =
                         zipEntryFromModule time moduleFile
                  in
                  Zip.fromEntries
-                    [ toZipEntry natNModule
+                    [ toZipEntry natNsModule
                     , toZipEntry natNTypeModule
                     ]
                     |> Zip.toBytes
@@ -179,12 +179,12 @@ update msg model =
 
         SwitchVisibleModule moduleKind ->
             ( case moduleKind of
-                NatN ->
+                NatNs ->
                     { model
-                        | natNModuleShownOrFolded =
+                        | natNsModuleShownOrFolded =
                             switchShownOrFolded
-                                (.natNModuleShownOrFolded model)
-                                viewNatNModule
+                                (.natNsModuleShownOrFolded model)
+                                viewNatNsModule
                     }
                 NatNType ->
                     { model
@@ -267,21 +267,21 @@ lastN : Int
 lastN =
     192
 
-viewNatNModule : Ui.Element msg
-viewNatNModule =
-    Ui.module_ natNModule
+viewNatNsModule : Ui.Element msg
+viewNatNsModule =
+    Ui.module_ natNsModule
 
 
-natNModule : Module NatNTag
-natNModule =
-    { name = [ "Nat", "N" ]
+natNsModule : Module NatNsTag
+natNsModule =
+    { name = [ "Nat", "Ns" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
-                    , markdown "See [Nat.Bound.N](Nat-Bound#N) for a detailed explanation."
-                    , docTagsFrom NatNValue declarations
+                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for a detailed explanation."
+                    , docTagsFrom NatNsValue declarations
                     ]
             }
     , imports =
@@ -293,42 +293,16 @@ natNModule =
                     |> List.map typeOrAliasExpose
                 )
             )
-        , importStmt [ "N", "Nat", "Type" ] noAlias exposingAll
-        , importStmt [ "Internal" ] noAlias noExposing
+        , importStmt [ "Nat", "N", "Type" ] noAlias exposingAll
+        , importStmt [ "Internal" ] noAlias
+            (exposingExplicit [ funExpose "add1", funExpose "sub1" ])
         ]
     , declarations =
         let
             natComment x =
                 [ markdown ("The `Nat` " ++ String.fromInt x ++ ".") ]
         in
-        [ [ localFunDecl
-                (funAnn
-                    [ natNAnn
-                        (nAnn
-                            (typeVar "n")
-                            (differenceAnn (typeVar "a") (typeVar "nPlusA"))
-                        )
-                    ]
-                    (natNAnn
-                        (nAnn
-                            (natXPlusAnn 1 (typeVar "n"))
-                            (differenceAnn
-                                (typeVar "a")
-                                (natXPlusAnn 1 (typeVar "nPlusA"))
-                            )
-                        )
-                    )
-                )
-                "add1"
-                []
-                (binOpChain
-                    (fqFun [ "Internal" ] "toInt")
-                    composer
-                    [ construct "(+)" [ int 1 ]
-                    , fqFun [ "Internal" ] "Nat"
-                    ]
-                )
-          , packageExposedFunDecl NatNValue
+        [ [ packageExposedFunDecl NatNsValue
                 (natComment 0)
                 zeroAnn
                 "nat0"
@@ -338,7 +312,7 @@ natNModule =
         , List.range 1 lastN
             |> List.map
                 (\x ->
-                    packageExposedFunDecl NatNValue
+                    packageExposedFunDecl NatNsValue
                         (natComment x)
                         (natNAnn
                             (nAnn
@@ -476,7 +450,7 @@ charPrefixed use last =
 
 
 view : Model -> Html Msg
-view { natNModuleShownOrFolded, natNTypeModuleShownOrFolded } =
+view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
     Ui.layoutWith
         { options =
             [ Ui.focusStyle
@@ -552,8 +526,8 @@ view { natNModuleShownOrFolded, natNTypeModuleShownOrFolded } =
                                     Folded ->
                                         switchButton ("⌄ " ++ name) switch
                         in
-                        [ ( natNModuleShownOrFolded
-                          , ( "Nat.N", NatN )
+                        [ ( natNsModuleShownOrFolded
+                          , ( "Nat.Ns", NatNs )
                           )
                         , ( natNTypeModuleShownOrFolded
                           , ( "Nat.N.Type", NatNType )

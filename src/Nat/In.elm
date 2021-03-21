@@ -43,8 +43,8 @@ If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 import Internal
 import Nat exposing (Nat, toInt)
 import Nat.Bound exposing (..)
-import Nat.N exposing (..)
 import Nat.N.Type exposing (..)
+import Nat.Ns exposing (..)
 import Random
 
 

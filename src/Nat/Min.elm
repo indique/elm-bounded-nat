@@ -44,8 +44,8 @@ module Nat.Min exposing
 import Internal
 import Nat exposing (Nat, toInt)
 import Nat.Bound exposing (Difference, In, Is, Min, N, Only, To)
-import Nat.N exposing (..)
 import Nat.N.Type exposing (..)
+import Nat.Ns exposing (..)
 
 
 
