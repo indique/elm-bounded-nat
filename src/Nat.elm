@@ -63,7 +63,7 @@ toInt =
     Internal.toInt
 
 
-{-| The greater of 2 `Nat (Min ...)`s. Works just like [Basics.max](Basics#max).
+{-| The greater of 2 `Nat`s. Works just like `Basics.max`.
 
     Nat.theGreater
         (nat3 |> Nat.N.toMin)
@@ -76,7 +76,7 @@ theGreater a b =
     max (toInt a) (toInt b) |> Internal.Nat
 
 
-{-| The smaller of 2 `Nat.Min`s. Works just like [Basics.min](Basics#min).
+{-| The smaller of 2 `Nat`s. Works just like `Basics.min`.
 
     Nat.theSmaller
         (nat3 |> Nat.N.toMin)
