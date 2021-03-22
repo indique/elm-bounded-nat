@@ -336,20 +336,18 @@ toPower power =
 
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
-    is4 =
+    present =
         Nat.Min.lowerMin (nat0 |> Nat.N.toIn)
-            >> is ( nat4, nat4 ) { min = nat0 }
-                { greater = \x-> Err (Nat.toInt x ++ " is greater than 4")
-                , less = \x-> Err (Nat.toInt x ++ " is less than 4")
-                , equal = \() -> Ok ()
+            >> Nat.Min.is (nat18 |> Nat.N.toIn)
+                { min = nat0 }
+                { less = \age -> appropriateToy { age = age }
+                , greater = \age -> appropriateExperience { age = age }
+                , equal = \() -> bigPresent
                 }
 
+    appropriateToy : { age : Nat (In Nat0 Nat17) } -> Toy
 
-    is4 (Nat.N.toMin nat4)
-    --> OK ()
-
-    is4 (Nat.N.toMin nat3)
-    --> Err "3 is less than 4"
+    appropriateExperience : { age : Nat (Min Nat19) } -> Experience
 
 -}
 is :
