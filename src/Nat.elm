@@ -1,6 +1,7 @@
 module Nat exposing
     ( Nat
     , toInt
+    , theGreater, theSmaller
     )
 
 {-|
@@ -11,6 +12,11 @@ module Nat exposing
 ## transform
 
 @docs toInt
+
+
+## compare
+
+@docs theGreater, theSmaller
 
 -}
 
@@ -55,3 +61,29 @@ type alias Nat range =
 toInt : Nat range -> Int
 toInt =
     Internal.toInt
+
+
+{-| The greater of 2 `Nat (Min ...)`s. Works just like [Basics.max](Basics#max).
+
+    Nat.theGreater
+        (nat3 |> Nat.N.toMin)
+        (nat4 |> Nat.N.toMin |> Nat.Min.lowerMin (nat3 |> Nat.N.toIn))
+    --> Nat 4
+
+-}
+theGreater : Nat range -> Nat range -> Nat range
+theGreater a b =
+    max (toInt a) (toInt b) |> Internal.Nat
+
+
+{-| The smaller of 2 `Nat.Min`s. Works just like [Basics.min](Basics#min).
+
+    Nat.theSmaller
+        (nat3 |> Nat.N.toMin)
+        (nat4 |> Nat.N.toMin |> Nat.Min.lowerMin (nat3 |> Nat.N.toIn))
+    --> Nat 3
+
+-}
+theSmaller : Nat range -> Nat range -> Nat range
+theSmaller a b =
+    min (toInt a) (toInt b) |> Internal.Nat

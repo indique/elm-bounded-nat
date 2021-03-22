@@ -1,7 +1,7 @@
 module Nat.Min exposing
     ( abs
     , atMost, intAtLeast, atLeast
-    , isIntAtLeast, is, isAtLeast, isAtMost, theGreater, theSmaller
+    , isIntAtLeast, is, isAtLeast, isAtMost
     , lowerMin
     , addN, subN, add, subIn, mul, div, remainderBy, toPower
     , range
@@ -22,7 +22,7 @@ module Nat.Min exposing
 
 ### compare
 
-@docs isIntAtLeast, is, isAtLeast, isAtMost, theGreater, theSmaller
+@docs isIntAtLeast, is, isAtLeast, isAtMost
 
 
 ## drop information
@@ -452,34 +452,6 @@ isAtMost triedUpperLimit min cases =
 
         else
             .greater cases (Internal.newRange minNat)
-
-
-{-| The greater of 2 `Nat (Min ...)`s. Works just like [Basics.max](Basics#max).
-
-    Nat.Min.theGreater
-        (nat3 |> Nat.N.toMin)
-        (nat4 |> Nat.N.toMin |> Nat.Min.lowerMin (nat3 |> Nat.N.toIn))
-    --> Nat 4
-
--}
-theGreater : Nat (Min min) -> Nat (Min min) -> Nat (Min min)
-theGreater a b =
-    Basics.max (toInt a) (toInt b)
-        |> Internal.Nat
-
-
-{-| The smaller of 2 `Nat.Min`s. Works just like [Basics.min](Basics#min).
-
-    Nat.Min.theSmaller
-        (nat3 |> Nat.N.toMin)
-        (nat4 |> Nat.N.toMin |> Nat.Min.lowerMin (nat3 |> Nat.N.toIn))
-    --> Nat 3
-
--}
-theSmaller : Nat (Min min) -> Nat (Min min) -> Nat (Min min)
-theSmaller a b =
-    Basics.min (toInt a) (toInt b)
-        |> Internal.Nat
 
 
 
