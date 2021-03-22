@@ -3,9 +3,8 @@ module Nat.Min exposing
     , atMost, intAtLeast, atLeast
     , isIntAtLeast, is, isAtLeast, isAtMost
     , lowerMin
-    , addN, subN, add, subIn, mul, div, remainderBy, toPower, subInLossy
+    , addN, subN, add, subIn, mul, div, remainderBy, toPower, addLossy, subInLossy
     , range
-    , addLossy
     )
 
 {-| A Nat which is at least some minimum.
@@ -33,7 +32,7 @@ module Nat.Min exposing
 
 ## modify
 
-@docs addN, subN, add, subIn, mul, div, remainderBy, toPower, addLosssy, subInLossy
+@docs addN, subN, add, subIn, mul, div, remainderBy, toPower, addLossy, subInLossy
 
 
 ## extra
