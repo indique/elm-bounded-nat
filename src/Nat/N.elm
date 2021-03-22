@@ -46,7 +46,7 @@ toIn =
     Internal.newRange
 
 
-{-| The `NNat` plus 1.
+{-| The `Nat (N ...)` plus 1.
 
 Keep in mind that if you want add _any_ number,
 rather go for [`Nat (In ...)`](Nat-In) or [`Nat (Min ...)`](Nat-Min).
@@ -59,7 +59,7 @@ add1 =
     Internal.add1
 
 
-{-| The `NNat` minus 1.
+{-| The `Nat (N ...)` minus 1.
 
 Keep in mind that if you want subtract _any_ number,
 rather go for [`Nat (In ...)`](Nat-Bound#In) or [`Nat (Min ...)`](Nat-Bound#Min).

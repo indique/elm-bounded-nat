@@ -225,7 +225,7 @@ addN nNat =
     Internal.map ((+) (toInt nNat))
 
 
-{-| Subtract a `InNat`. The second argument is the maximum if the subtracted `Nat (In ...)`.
+{-| Subtract a `Nat (In ...)`. The second argument is the maximum if the subtracted `Nat (In ...)`.
 
     (nat5 |> Nat.N.toMin)
         |> Nat.Min.subIn inNat0To5 nat5

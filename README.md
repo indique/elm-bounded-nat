@@ -60,7 +60,7 @@ They can prove it by
 - already knowing
   ```elm
   nat100
-  -- of type NNat Nat100
+  -- of type Nat (N Nat100 ...)
   -- → We know the EXACT value
       |> Nat.N.toIn
       -- → it must also be in range 100 to 100 + ...
