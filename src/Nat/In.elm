@@ -83,16 +83,16 @@ intInRange lowerLimit upperLimit =
         >> Internal.Nat
 
 
-{-| **Cap** the `Nat.In` to at most a number.
+{-| **Cap** the `Nat (In ...)` to at most a number.
 
-    Nat.N.toIn nat5
+    nat5 |> Nat.N.toIn
         |> Nat.In.atMost nat10 { min = nat5 }
     --> Nat.In 5
 
-    Nat.N.toIn nat15
+    nat15 |> Nat.N.toIn
         |> Nat.In.lowerMin nat5
         |> Nat.In.atMost nat10 { min = nat5 }
-    --> Nat.In 10
+    --> Nat 10
 
 `min` ensures that that number is at least the minimum.
 
@@ -106,7 +106,7 @@ atMost higherLimit min =
     Internal.map (Basics.min (higherLimit |> toInt))
 
 
-{-| If the `Nat.In` is less than a number, return that number instead.
+{-| If the `Nat (In ...)` is less than a number, return that number instead.
 
     nat5 |> Nat.N.toIn
         |> Nat.In.atLeast nat10
@@ -164,14 +164,14 @@ isIntInRange interval cases int =
         .inRange cases (int |> Internal.Nat)
 
 
-{-| Is the `Nat.In`
+{-| Is the `Nat (In ...)`
 
   - `equalOrGreater` than a `Nat` or
 
   - `less`?
 
 ```
-vote : { age : Nat.In (Nat18Plus orOlder) max } -> Vote
+vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
 
 tryToVote =
     Nat.In.lowerMin nat0
@@ -203,7 +203,7 @@ isAtLeast triedLowerLimit min cases =
             .less cases (Internal.newRange inNat)
 
 
-{-| Is the `Nat.In`
+{-| Is the `Nat (In ...)`
 
   - `equalOrLess` than a `Nat` or
 
@@ -287,7 +287,7 @@ is tried min cases =
                 .less cases (Internal.newRange inNat)
 
 
-{-| Compared to a range `first` to `last`, is the `Nat.In`
+{-| Compared to a range `first` to `last`, is the `Nat (In ...)`
 
   - `inRange`
 
@@ -389,7 +389,7 @@ addN addedNat =
     Internal.map (\inNat -> inNat + toInt (addedNat |> Tuple.first))
 
 
-{-| Subtract a `Nat.In`.
+{-| Subtract a `Nat (In ...)`.
 
     nat6 |> Nat.N.toIn
         |> Nat.In.sub between1And5 nat1 nat5
@@ -475,15 +475,15 @@ lowerMin :
     Nat (N lowerMin Is (Difference currentMinusAlsoValidmin To min))
     -> Nat (In min max)
     -> Nat (In lowerMin max)
-lowerMin lowerMinimum =
-    Internal.newRange
+lowerMin =
+    \_ -> Internal.newRange
 
 
-{-| Set the maximum higher.
+{-| Make it fit into functions with higher maximum.
 
 You should design type annotations as general as possible.
 
-    onlyAtMost18 : Nat.In min Nat18
+    onlyAtMost18 : Nat (In min Nat18)
 
     onlyAtMost18 between3And8 --fine
 
@@ -501,13 +501,13 @@ maxIs :
     Nat (N max Is (Difference a To maxPlusA))
     -> Nat (In min max)
     -> Nat (In min maxPlusA)
-maxIs max =
-    Internal.newRange
+maxIs =
+    \_ -> Internal.newRange
 
 
 {-| Convert a `Nat (In ...)` to a `Nat (Min ...)`.
 
-    squareANat.In =
+    squareAInNat =
         Nat.In.dropMax >> Nat.Min.toPower (nat2 |> Nat.N.toMin)
 
 -}
@@ -520,7 +520,7 @@ dropMax =
 -- ## more
 
 
-{-| `Nat.In`s from a first to a last value.
+{-| `Nat (In ...)`s from a first to a last value.
 
     from3To10 =
         Nat.In.range (nat3 |> Nat.N.toIn) (nat10 |> Nat.N.toIn)
@@ -535,12 +535,12 @@ range first last =
         |> List.map Internal.Nat
 
 
-{-| Generate a random `Nat.In` in a range.
+{-| Generate a random `Nat (In ...)` in a range.
 -}
 random :
-    Nat (N min Is (Difference range To max))
-    -> Nat (N max Is (Difference a To maxPlusA))
-    -> Random.Generator (Nat (In min maxPlusA))
+    Nat (In firstMin lastMin)
+    -> Nat (In lastMin lastMax)
+    -> Random.Generator (Nat (In firstMin lastMax))
 random min max =
     Random.int (toInt min) (toInt max)
         |> Random.map Internal.Nat

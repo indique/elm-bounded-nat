@@ -295,7 +295,7 @@ natNsModule =
             )
         , importStmt [ "Nat", "N", "Type" ] noAlias exposingAll
         , importStmt [ "Internal" ] noAlias
-            (exposingExplicit [ funExpose "add1", funExpose "sub1" ])
+            (exposingExplicit [ funExpose "add1" ])
         ]
     , declarations =
         let

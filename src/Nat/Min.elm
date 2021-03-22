@@ -43,7 +43,7 @@ module Nat.Min exposing
 
 import Internal
 import Nat exposing (Nat, toInt)
-import Nat.Bound exposing (Difference, In, Is, Min, N, Only, To)
+import Nat.Bound exposing (Difference, In, Is, Min, N, To)
 import Nat.N.Type exposing (..)
 import Nat.Ns exposing (..)
 
@@ -69,8 +69,8 @@ lowerMin :
     Nat (In lowerMin min)
     -> Nat (Min min)
     -> Nat (Min lowerMin)
-lowerMin lower =
-    Internal.newRange
+lowerMin =
+    \_ -> Internal.newRange
 
 
 
@@ -354,7 +354,7 @@ toPower power =
 -}
 is :
     Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA))
-    -> { min : Nat (In min triedMinus1) }
+    -> { min : Nat (N min Is (Difference lessRange To triedMinus1)) }
     ->
         { equal : () -> result
         , less : Nat (In min triedMinus1PlusA) -> result

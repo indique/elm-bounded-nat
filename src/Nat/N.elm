@@ -18,7 +18,7 @@ module Nat.N exposing
 -}
 
 import Internal
-import Nat exposing (Nat, toInt)
+import Nat exposing (Nat)
 import Nat.Bound exposing (..)
 import Nat.N.Type exposing (..)
 

@@ -44,7 +44,7 @@ See [Nat.Bound.N](Nat-Bound#N) for a detailed explanation.
 
 -}
 
-import Internal exposing (add1, sub1)
+import Internal exposing (add1)
 import Nat exposing (Nat)
 import Nat.Bound exposing (Difference, Is, N, To)
 import Nat.N.Type exposing (..)
