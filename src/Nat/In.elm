@@ -171,14 +171,14 @@ isIntInRange interval cases int =
   - `less`?
 
 ```
-vote : { a | age : Nat.In (Nat18Plus orOlder) max } -> Vote
+vote : { age : Nat.In (Nat18Plus orOlder) max } -> Vote
 
 tryToVote =
     Nat.In.lowerMin nat0
         >> Nat.In.isAtLeast ( nat18, nat18 )
             { min = nat0 }
             { less = Nothing --😓
-            , equalOrGreater = Just << vote
+            , equalOrGreater = \age -> Just (vote { age = age })
             }
 ```
 
