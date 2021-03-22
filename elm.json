@@ -3,7 +3,7 @@
     "name": "indique/elm-bounded-nat",
     "summary": "natural number in a range at compile-time",
     "license": "MIT",
-    "version": "5.0.1",
+    "version": "6.0.0",
     "exposed-modules": [
         "Nat",
         "Nat.N",
