@@ -12,10 +12,6 @@ This package contains many ways to ensure that a `Nat` is in a range _at compile
 
 Setup
 
-```noformatingplease
-elm install indique/elm-bounded-nat
-```
-
 ```elm
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
@@ -66,11 +62,11 @@ They can prove it by
   nat100
   -- of type NNat Nat100
   -- → We know the EXACT value
-      |> Nat.In.n
+      |> Nat.N.toIn
       -- → it must also be in range 100 to 100 + ...
   red =
-    rgbPer100 (nat100 |> Nat.In.n)
-        (nat0 |> Nat.In.n) (nat0 |> Nat.In.n)
+    rgbPer100 (nat100 |> Nat.N.toIn)
+        (nat0 |> Nat.N.toIn) (nat0 |> Nat.N.toIn)
         -- 👍
   ```
 - checking
@@ -111,9 +107,9 @@ factorial : Nat (Min min) -> Nat (Min Nat1)
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
 factorialHelp =
-    Nat.Min.isAtLeast nat1
+    Nat.Min.isAtLeast (nat1 |> Nat.N.toIn)
         { min = nat0 } -- the minimum of the x
-        { less = \_ -> Nat.Min.n nat1 -- x < 1 ? → then 1
+        { less = \_ -> Nat.N.toMin nat1 -- x < 1 ? → then 1
         , equalOrGreater = -- x >= 1 ?
             \oneOrGreater -> --we now know it is a Nat.Min Nat1
                 oneOrGreater
@@ -127,14 +123,15 @@ factorialHelp =
 As the minimum is allowed to be anything `>= 0`:
 ```elm
 factorial =
-    Nat.Min.lowerMin nat0 >> factorialHelp
+    Nat.Min.lowerMin (nat0 |> Nat.N.toIn)
+        >> factorialHelp
 ```
 
-→ `factorial (Nat.Min.n nat4) |> Nat.toInt --> 24`
+→ `factorial (nat4 |> Nat.N.toMin) --> Nat 24`
 
 → There is no way to put a negative number in.
 
-→ We have the extra promise, that every result `is >= 1`
+→ We have the extra promise, that every result is `>= 1`
 
 We can do even better!
 We know that `!19` is already bigger than the maximum safe `Int` `2^53 - 1`.
@@ -142,13 +139,13 @@ We know that `!19` is already bigger than the maximum safe `Int` `2^53 - 1`.
 ```elm
 safeFactorial : Nat (In min Nat18) -> Nat (Min Nat1)
 safeFactorial =
-    Nat.Min.fromIn >> factorial
+    Nat.In.dropMax >> factorial
 ```
 
 
 ## tips
 
-- keep as much type information as possible and drop it only where you don't need it.
+- keep _as much type information as possible_ and drop it only where you need to.
     ```elm
     squaresTo10 =
         Nat.In.range nat0 nat10
@@ -161,7 +158,7 @@ safeFactorial =
                     --but we know its at least Nat0
                 )
     ```
-- keep your function annotations as general as possible
+- keep your _function annotations as general as possible_
     
     Instead of accepting only values where you know the values exact
   ```elm

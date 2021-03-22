@@ -8,6 +8,7 @@ import Nat exposing (Nat)
 import Nat.Bound exposing (In, Min, N)
 import Nat.In
 import Nat.Min
+import Nat.N
 import Nat.N.Type exposing (..)
 import Nat.Ns exposing (..)
 import Test exposing (Test, describe, test)
@@ -18,7 +19,7 @@ suite =
     describe "MinNat"
         [ test "factorial"
             (\() ->
-                factorial (nat4 |> Nat.Min.n)
+                factorial (nat4 |> Nat.N.toMin)
                     |> Nat.toInt
                     |> Expect.equal 24
             )
@@ -38,31 +39,28 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-natFactorial : Nat (Min Nat0) -> Nat (Min Nat1)
-natFactorial =
-    Nat.Min.isAtLeast nat1
-        { min = nat0 }
-        { less = \_ -> Nat.Min.n nat1
+factorialHelp : Nat (Min Nat0) -> Nat (Min Nat1)
+factorialHelp =
+    Nat.Min.isAtLeast (nat1 |> Nat.N.toIn) { min = nat0 }
+        { less = \_ -> nat1 |> Nat.N.toMin
         , equalOrGreater =
-            \oneOrGreater ->
-                oneOrGreater
-                    |> Nat.Min.mul
-                        (natFactorial
-                            (oneOrGreater |> Nat.Min.subN nat1)
-                        )
+            \gt0 ->
+                Nat.Min.mul
+                    (factorialHelp (gt0 |> Nat.Min.subN nat1))
+                    gt0
         }
 
 
 factorial : Nat (Min min) -> Nat (Min Nat1)
 factorial =
-    Nat.Min.lowerMin nat0 >> natFactorial
+    Nat.Min.lowerMin (nat0 |> Nat.N.toIn) >> factorialHelp
 
 
 listLength : List a -> Nat (Min Nat0)
 listLength =
     List.foldl
-        (\_ -> Nat.Min.addN nat1 >> Nat.Min.lowerMin nat0)
-        (Nat.Min.n nat0)
+        (\_ -> Nat.Min.addN nat1 >> Nat.Min.lowerMin (nat0 |> Nat.N.toIn))
+        (Nat.N.toMin nat0)
 
 
 
@@ -71,30 +69,32 @@ listLength =
 
 testAdd : Nat (Min Nat4)
 testAdd =
-    Nat.Min.intAtLeast nat3 7
-        |> Nat.Min.add (Nat.Min.intAtLeast nat1 9) nat1
+    Nat.Min.intAtLeast (nat3 |> Nat.N.toMin) 7
+        |> Nat.Min.add (Nat.Min.intAtLeast (nat1 |> Nat.N.toMin) 9) nat1
 
 
 testAddN : Nat (Min Nat15)
 testAddN =
-    Nat.Min.intAtLeast nat6 7
+    Nat.Min.intAtLeast (nat6 |> Nat.N.toMin) 7
         |> Nat.Min.addN nat9
 
 
 testSubIn : Nat (Min Nat1)
 testSubIn =
-    Nat.Min.intAtLeast nat6 7
-        |> Nat.Min.subIn (Nat.In.intInRange nat1 nat5 4) nat5
+    Nat.Min.intAtLeast (nat6 |> Nat.N.toMin) 7
+        |> Nat.Min.subIn
+            (Nat.In.intInRange (nat1 |> Nat.N.toIn) (nat5 |> Nat.N.toIn) 4)
+            nat5
 
 
 testSubN : Nat (Min Nat7)
 testSubN =
-    Nat.Min.intAtLeast nat16 17
+    Nat.Min.intAtLeast (nat16 |> Nat.N.toMin) 17
         |> Nat.Min.subN nat9
 
 
 testLowerMin : List (Nat (Min Nat3))
 testLowerMin =
-    [ Nat.Min.n nat3
-    , Nat.Min.n nat4 |> Nat.Min.lowerMin nat3
+    [ Nat.N.toMin nat3
+    , Nat.N.toMin nat4 |> Nat.Min.lowerMin (nat3 |> Nat.N.toIn)
     ]

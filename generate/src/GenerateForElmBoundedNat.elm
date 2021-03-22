@@ -350,7 +350,7 @@ natNTypeModule =
                     [ markdown "Express exact numbers in the type."
                     , markdown "- Describe an exact value"
                     , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
-                    , markdown "    - `takesOnlyExact1 (nat10 |> Nat.In.n)` is a compile-time error"
+                    , markdown "    - `takesOnlyExact1 (nat10 |> Nat.N.toIn)` is a compile-time error"
                     , markdown "- Add a fixed value"
                     , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
                     , markdown "    - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`"

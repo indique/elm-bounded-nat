@@ -60,7 +60,7 @@ module Nat.N.Type exposing
 
         onlyExact1 : Nat (Only Nat1) -> Cake
 
-      - `takesOnlyExact1 (nat10 |> Nat.In.n)` is a compile-time error
+      - `takesOnlyExact1 (nat10 |> Nat.N.toIn)` is a compile-time error
 
   - Add a fixed value
 

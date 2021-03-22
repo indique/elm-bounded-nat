@@ -76,7 +76,7 @@ Only useful in function annotations.
 
     repeat : Nat (Only n) -> element -> Arr (Only n)
 
-    repeat (Nat.In.n nat6) "ok"
+    repeat (Nat.N.toIn nat6) "ok"
     --> Arr (Only Nat6)
 
 → repeating an `element` `n` times will give you a Arr of `n` elements.

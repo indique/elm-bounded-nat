@@ -1,4 +1,7 @@
-module Nat.N exposing (add1, sub1)
+module Nat.N exposing
+    ( add1, sub1
+    , toMin, toIn
+    )
 
 {-|
 
@@ -7,12 +10,40 @@ module Nat.N exposing (add1, sub1)
 
 @docs add1, sub1
 
+
+## drop information
+
+@docs toMin, toIn
+
 -}
 
 import Internal
-import Nat exposing (Nat)
-import Nat.Bound exposing (Difference, Is, N, To)
+import Nat exposing (Nat, toInt)
+import Nat.Bound exposing (..)
 import Nat.N.Type exposing (..)
+
+
+{-| Convert an exact `Nat n` to a `Nat (Min n)`.
+
+    nat4 |> Nat.N.toMin
+    --> is of type Nat (Min Nat4)
+
+-}
+toMin : Nat (N n Is difference) -> Nat (Min n)
+toMin =
+    Internal.newRange
+
+
+{-| A `Nat (In ...)` from an exact `Nat (N n ...)`.
+
+The minimum is `n`, the maximum `>= n`.
+
+-}
+toIn :
+    Nat (N n Is (Difference a To nPlusA))
+    -> Nat (In n nPlusA)
+toIn =
+    Internal.newRange
 
 
 {-| The `NNat` plus 1.

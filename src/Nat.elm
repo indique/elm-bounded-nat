@@ -45,8 +45,8 @@ type alias Nat range =
 {-| Convert a `Nat` to an `Int`.
 
     nat4 |> Nat.toInt --> 4
-    Nat.In.n nat4 |> Nat.toInt --> 4
-    Nat.Min.n nat4 |> Nat.toInt --> 4
+    Nat.N.toIn nat4 |> Nat.toInt --> 4
+    Nat.N.toMin nat4 |> Nat.toInt --> 4
 
     compare a b =
         compare (Nat.toInt a) (Nat.toInt b)
