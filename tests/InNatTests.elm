@@ -98,5 +98,5 @@ testSubN =
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a)))
 testLowerMin =
     [ Nat.N.toIn nat3
-    , Nat.N.toIn nat4 |> Nat.In.lowerMin nat3
+    , Nat.N.toIn nat4 |> Nat.In.lowerMin (nat3 |> Nat.N.toIn)
     ]

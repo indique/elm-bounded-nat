@@ -5,7 +5,7 @@ module MinNatTests exposing (factorial, suite)
 
 import Expect
 import Nat exposing (Nat)
-import Nat.Bound exposing (In, Min, N)
+import Nat.Bound exposing (Min)
 import Nat.In
 import Nat.Min
 import Nat.N
@@ -26,10 +26,8 @@ suite =
         ]
 
 
-
---recurses idefinitely for negative integers
-
-
+{-| recurses idefinitely for negative integers
+-}
 intFactorial : Int -> Int
 intFactorial x =
     if x == 0 then
@@ -41,7 +39,8 @@ intFactorial x =
 
 factorialHelp : Nat (Min Nat0) -> Nat (Min Nat1)
 factorialHelp =
-    Nat.Min.isAtLeast (nat1 |> Nat.N.toIn) { min = nat0 }
+    Nat.Min.isAtLeast (nat1 |> Nat.N.toIn)
+        { min = nat0 }
         { less = \_ -> nat1 |> Nat.N.toMin
         , equalOrGreater =
             \gt0 ->

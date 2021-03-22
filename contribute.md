@@ -9,7 +9,8 @@
 
 - share your thoughts
 - add operations that might be useful
-    - `Nat.N` & `Nat.N.Type` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
+    - e.g. more lossy operations
+    - note: `Nat.N` & `Nat.N.Type` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
 
 ### Summary Guide
 

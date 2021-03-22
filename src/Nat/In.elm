@@ -1,7 +1,7 @@
 module Nat.In exposing
     ( intInRange, atLeast, atMost
     , is, isInRange, isIntInRange, isAtLeast, isAtMost
-    , addN, subN, add, sub, div, remainderBy
+    , addN, subN, add, sub, div, remainderBy, subLossy
     , lowerMin, maxIs, dropMax
     , random, range
     )
@@ -24,7 +24,7 @@ module Nat.In exposing
 
 ## modify
 
-@docs addN, subN, add, sub, div, remainderBy
+@docs addN, subN, add, sub, div, remainderBy, subLossy
 
 If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 
@@ -43,6 +43,7 @@ If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 import Internal
 import Nat exposing (Nat, toInt)
 import Nat.Bound exposing (..)
+import Nat.N
 import Nat.N.Type exposing (..)
 import Nat.Ns exposing (..)
 import Random
@@ -90,7 +91,7 @@ intInRange lowerLimit upperLimit =
     --> Nat.In 5
 
     nat15 |> Nat.N.toIn
-        |> Nat.In.lowerMin nat5
+        |> Nat.In.lowerMin (nat5 |> Nat.N.toIn)
         |> Nat.In.atMost nat10 { min = nat5 }
     --> Nat 10
 
@@ -132,9 +133,9 @@ atLeast lowerLimit =
 {-| An `Int` compared to a range from `first` to `last`.
 
     rejectOrAcceptUserInt =
-        isIntInRange { first = nat1, last = nat100 }
+        isIntInRange (nat1 |> Nat.N.toIn) (nat100 |> Nat.N.toIn)
             { less = Err "must be >= 1"
-            , more = Err "must be <= 100"
+            , greater = \_-> Err "must be <= 100"
             , inRange = Ok
             }
 
@@ -143,13 +144,13 @@ atLeast lowerLimit =
 
 -}
 isIntInRange :
-    { first : Nat (N first Is (Difference range To last))
-    , last : Nat (N last Is (Difference a To lastPlusA))
+    { first : Nat (In minFirst last)
+    , last : Nat (In last lastPlusA)
     }
     ->
         { less : () -> result
         , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (In first lastPlusA) -> result
+        , inRange : Nat (In minFirst lastPlusA) -> result
         }
     -> Int
     -> result
@@ -174,7 +175,7 @@ isIntInRange interval cases int =
 vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
 
 tryToVote =
-    Nat.In.lowerMin nat0
+    Nat.In.lowerMin (nat0 |> Nat.N.toIn)
         >> Nat.In.isAtLeast ( nat18, nat18 )
             { min = nat0 }
             { less = Nothing --😓
@@ -295,7 +296,7 @@ is tried min cases =
 
 ```
 justIfBetween3And10 =
-    Nat.In.lowerMin nat0
+    Nat.In.lowerMin (nat0 |> Nat.N.toIn)
         >> Nat.In.isInRange
             { first = ( nat3, nat3 ), last = ( nat10, nat10 ) }
             { min = nat0 }
@@ -389,6 +390,13 @@ addN addedNat =
 
 {-| Subtract a `Nat (In ...)`.
 
+The 2 following arguments are
+
+  - the minimum subtracted value
+  - the maximum subtracted value
+
+If you don't have both at hand, use [`subLossy`](Nat-In#subLossy).
+
     nat6 |> Nat.N.toIn
         |> Nat.In.sub between1And5 nat1 nat5
     --> is of type Nat (In Nat1 (Nat5Plus a))
@@ -401,7 +409,29 @@ sub :
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
 sub subtractedInNat subtractedMin subtractedMax =
-    Internal.map (\inNat -> inNat - toInt subtractedInNat)
+    Internal.map (\x -> x - toInt subtractedInNat)
+
+
+{-| Subtract a `Nat (In ..)` safely, but without calculating the new bounds.
+
+    nat6 |> Nat.N.toIn
+        |> Nat.In.subLossy between1And5
+    --> is of type Nat (In Nat0 (Nat6Plus a))
+
+If you have both
+
+  - the minimum subtracted value
+  - the maximum subtracted value
+
+at hand, use [`sub`](Nat-In#sub).
+
+-}
+subLossy :
+    Nat (In subtractedMin min)
+    -> Nat (In min max)
+    -> Nat (In Nat0 max)
+subLossy subtractedInNat =
+    Internal.map (\x -> x - toInt subtractedInNat)
 
 
 {-| Subtract a fixed `Nat` value.
@@ -465,12 +495,12 @@ Elm complains:
 > But all the previous elements in the list are: `Nat (In Nat3 ...)`
 
     [ Nat.N.toIn nat3
-    , Nat.N.toIn nat4 |> Nat.In.lowerMin nat3
+    , Nat.N.toIn nat4 |> Nat.In.lowerMin (nat3 |> Nat.N.toIn)
     ]
 
 -}
 lowerMin :
-    Nat (N lowerMin Is (Difference currentMinusAlsoValidmin To min))
+    Nat (In lowerMin min)
     -> Nat (In min max)
     -> Nat (In lowerMin max)
 lowerMin =
@@ -522,6 +552,8 @@ dropMax =
 
     from3To10 =
         Nat.In.range (nat3 |> Nat.N.toIn) (nat10 |> Nat.N.toIn)
+
+The resulting `List` is never empty.
 
 -}
 range :

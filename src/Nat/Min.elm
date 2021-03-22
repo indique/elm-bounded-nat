@@ -3,8 +3,9 @@ module Nat.Min exposing
     , atMost, intAtLeast, atLeast
     , isIntAtLeast, is, isAtLeast, isAtMost
     , lowerMin
-    , addN, subN, add, subIn, mul, div, remainderBy, toPower
+    , addN, subN, add, subIn, mul, div, remainderBy, toPower, subInLossy
     , range
+    , addLossy
     )
 
 {-| A Nat which is at least some minimum.
@@ -32,7 +33,7 @@ module Nat.Min exposing
 
 ## modify
 
-@docs addN, subN, add, subIn, mul, div, remainderBy, toPower
+@docs addN, subN, add, subIn, mul, div, remainderBy, toPower, addLosssy, subInLossy
 
 
 ## extra
@@ -200,6 +201,8 @@ intAtLeast minimum =
         |> Nat.Min.add atLeast2 nat2
     --> is of type Nat (Min Nat7)
 
+If you have don't the minimum added value at hand, use [`addLossy`](Nat-Min#addLossy).
+
 -}
 add :
     Nat (Min addedMin)
@@ -210,10 +213,28 @@ add addedMinNat addedMin =
     Internal.map ((+) (toInt addedMinNat))
 
 
+{-| Add a `Nat (Min ...)`. The second argument is the minimum if the added `Nat (Min ...)`.
+
+    atLeast5 |> Nat.Min.addLossy atLeast2
+    --> is of type Nat (Min Nat5)
+
+    atLeast2 |> Nat.Min.addLossy atLeast5
+    --> is of type Nat (Min Nat2)
+
+If you have the minimum added value at hand, use [`add`](Nat-Min#add).
+
+-}
+addLossy :
+    Nat (Min addedMin)
+    -> Nat (Min min)
+    -> Nat (Min min)
+addLossy addedMinNat =
+    Internal.map ((+) (toInt addedMinNat))
+
+
 {-| Add an exact `Nat (N ...)`.
 
-    (nat5 |> Nat.N.toMin)
-        |> Nat.Min.addN nat2
+    atLeast5 |> Nat.Min.addN nat2
     --> is of type Nat (Min Nat7)
 
 -}
@@ -227,9 +248,10 @@ addN nNat =
 
 {-| Subtract a `Nat (In ...)`. The second argument is the maximum if the subtracted `Nat (In ...)`.
 
-    (nat5 |> Nat.N.toMin)
-        |> Nat.Min.subIn inNat0To5 nat5
-    --> is of type Nat (Min Nat0)
+    atLeast6 |> Nat.Min.subIn inNat0To5 nat5
+    --> is of type Nat (Min Nat1)
+
+If you have don't the maximum subtracted value at hand, use [`subInLossy`](Nat-Min#subInLossy).
 
 -}
 subIn :
@@ -239,6 +261,23 @@ subIn :
     -> Nat (Min differenceMin)
 subIn subtractedInNat subtractedMax =
     Internal.map (\base -> base - toInt subtractedInNat)
+
+
+{-| Subtract a `Nat (In ..)` safely, but without calculating the new minimum.
+
+    nat6 |> Nat.N.toMin
+        |> Nat.In.subInLossy between1And5
+    --> is of type Nat (Min Nat0)
+
+If you have the maximum subtracted value at hand, use [`sub`](Nat-Min#sub).
+
+-}
+subInLossy :
+    Nat (In subtractedMin min)
+    -> Nat (Min min)
+    -> Nat (Min Nat0)
+subInLossy subtractedInNat =
+    Internal.map (\x -> x - toInt subtractedInNat)
 
 
 {-| Subtract an exact `Nat`.
