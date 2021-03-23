@@ -238,9 +238,9 @@ addLossy addedMinNat =
 
 -}
 addN :
-    Nat (N n (Is min To minPlusN))
+    Nat (N added (Is min To sumMin))
     -> Nat (Min min)
-    -> Nat (Min minPlusN)
+    -> Nat (Min sumMin)
 addN nNat =
     Internal.map ((+) (toInt nNat))
 
@@ -287,9 +287,9 @@ subInLossy subtractedInNat =
 
 -}
 subN :
-    Nat (N n (Is minMinusN To min))
+    Nat (N subtracted (Is differenceMin To min))
     -> Nat (Min min)
-    -> Nat (Min minMinusN)
+    -> Nat (Min differenceMin)
 subN nNat =
     Internal.map (\base -> base - toInt nNat)
 

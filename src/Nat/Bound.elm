@@ -110,6 +110,13 @@ type And
 
 would describe a difference of 1.
 
+An example is [`Nat.Min.addN`](Nat-Min#addN)
+
+    addN :
+        Nat (N added (Is min To sumMin))
+        -> Nat (Min min)
+        -> Nat (Min sumMin)
+
 -}
 type alias Is a to b =
     IsBoth a to b And a to b
@@ -120,6 +127,13 @@ type alias Is a to b =
     IsBoth a To (Nat1Plus a) And b To (Nat1Plus b)
 
 would describe a difference of 1.
+
+An example is [`Nat.In.addN`](Nat-In#addN)
+
+    addN :
+        Nat (N added (IsBoth min To sumMin And max To sumMax))
+        -> Nat (In min max)
+        -> Nat (In sumMin sumMax)
 
 -}
 type IsBoth a to b and c to_ d
@@ -141,18 +155,24 @@ Looking at the type
                 )
             )
 
-It is also used to describe a difference between two values.
+  - use `Is a To b` to describe a difference between two values
+      - An example is [`Nat.Min.addN`](Nat-Min#addN)
 
-    interval :
-        { first : Nat (N first (Is range To last))
-        , last : Nat (Only last)
-        }
-        -> Interval
+            addN :
+                Nat (N added (Is min To sumMin))
+                -> Nat (Min min)
+                -> Nat (Min sumMin)
 
-→ because `range` is 0 or positive, `last` must also be at least as high as `first`.
+  - use `IsBoth a To b And c To d` to describe 2 differences
+      - An example is [`Nat.In.addN`](Nat-In#addN)
+
+            addN :
+                Nat (N added (IsBoth min To sumMin And max To sumMax))
+                -> Nat (In min max)
+                -> Nat (In sumMin sumMax)
 
 If you only want to ensure that it is within a minimum (& maximum), [`Min`](Nat-Bound#Min) or [`In`](Nat-Bound#In) is the right choice!
-This is most of the time the better choice for calculations.
+This is the better choice for most calculations.
 
 -}
 type N n isDifference
