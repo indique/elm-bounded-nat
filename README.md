@@ -25,10 +25,10 @@ import Nat.N.Type exposing (..)
     --Nat0 to Nat192 & Nat0Plus to Nat192Plus
 ```
 
-## 2 examples
+## examples
 
 
-### `color`
+### color
 
 ```elm
 rgb : Float -> Float -> Float -> Color
@@ -84,8 +84,28 @@ They can prove it by
 &emsp;
 
 
+### digit
 
-### `factorial`
+```elm
+toDigit : Char -> Maybe Int
+```
+
+You might be able to do anything with this `Int` value, but you lost useful information.
+
+- How can this be negative?
+- How can this have multiple digits?
+
+```elm
+toDigit : Char -> Maybe Digit
+
+type alias Digit =
+    Nat (In Nat0 Nat9)
+```
+
+&emsp;
+
+
+### factorial
 
 ```elm
 intFactorial : Int -> Int
