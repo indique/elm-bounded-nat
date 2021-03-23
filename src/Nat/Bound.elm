@@ -2,8 +2,7 @@ module Nat.Bound exposing
     ( Min
     , In
     , Only
-    , N, Is
-    , Difference, To
+    , N, Is, IsBoth, And, To
     )
 
 {-|
@@ -26,8 +25,7 @@ module Nat.Bound exposing
 
 ## N
 
-@docs N, Is
-@docs Difference, To
+@docs N, Is, IsBoth, And, To
 
 -}
 
@@ -90,31 +88,42 @@ type alias Only n =
 
 {-| No special meaning.
 
-    N n Is difference
-
--}
-type Is
-    = Is Never
-
-
-{-| No special meaning.
-
-    Difference a To b
+    Is a To b
 
 -}
 type To
     = To Never
 
 
+{-| No special meaning.
+
+    IsBoth a To b And c To d
+
+-}
+type And
+    = And Never
+
+
 {-| `b - a`.
 
-    Difference a To (Nat1Plus a)
+    Is a To (Nat1Plus a)
 
 would describe a difference of 1.
 
 -}
-type Difference a to b
-    = Difference Never
+type alias Is a to b =
+    IsBoth a to b And a to b
+
+
+{-| `b - a` & `d - c`.
+
+    IsBoth a To (Nat1Plus a) And b To (Nat1Plus b)
+
+would describe a difference of 1.
+
+-}
+type IsBoth a to b and c to_ d
+    = IsBoth Never
 
 
 {-| The _actual value_ is present in the type.
@@ -127,15 +136,15 @@ Looking at the type
             (N
                 -- 0 is the exact value at compile time
                 Nat0
-                Is
-                -- 0 as a difference is a - a
-                (Difference a To a)
+                (-- 0 as a difference is a - a & b - b
+                 IsBoth a To a And b To b
+                )
             )
 
 It is also used to describe a difference between two values.
 
     interval :
-        { first : Nat (N first Is (Difference range To last))
+        { first : Nat (N first (Is range To last))
         , last : Nat (Only last)
         }
         -> Interval
@@ -146,5 +155,5 @@ If you only want to ensure that it is within a minimum (& maximum), [`Min`](Nat-
 This is most of the time the better choice for calculations.
 
 -}
-type N n is difference
+type N n isDifference
     = N Never

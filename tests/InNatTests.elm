@@ -80,7 +80,7 @@ testAdd =
 testAddN : Nat (In Nat15 (Nat19Plus a))
 testAddN =
     Nat.In.intInRange (nat6 |> Nat.N.toIn) (nat10 |> Nat.N.toIn) 7
-        |> Nat.In.addN ( nat9, nat9 )
+        |> Nat.In.addN nat9
 
 
 testSub : Nat (In Nat1 (Nat9Plus a))
@@ -92,7 +92,7 @@ testSub =
 testSubN : Nat (In Nat7 (Nat11Plus a))
 testSubN =
     Nat.In.intInRange (nat16 |> Nat.N.toIn) (nat20 |> Nat.N.toIn) 17
-        |> Nat.In.subN ( nat9, nat9 )
+        |> Nat.In.subN nat9
 
 
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a)))

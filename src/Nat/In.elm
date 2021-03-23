@@ -99,8 +99,8 @@ intInRange lowerLimit upperLimit =
 
 -}
 atMost :
-    Nat (N newMax Is (Difference a To newMaxPlusA))
-    -> { min : Nat (N min Is (Difference newRange To newMax)) }
+    Nat (N newMax (Is a To newMaxPlusA))
+    -> { min : Nat (N min (Is newRange To newMax)) }
     -> Nat (In min oldMax)
     -> Nat (In min newMaxPlusA)
 atMost higherLimit min =
@@ -176,7 +176,7 @@ vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
 
 tryToVote =
     Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isAtLeast ( nat18, nat18 )
+        >> Nat.In.isAtLeast nat18
             { min = nat0 }
             { less = Nothing --😓
             , equalOrGreater = \age -> Just (vote { age = age })
@@ -185,10 +185,8 @@ tryToVote =
 
 -}
 isAtLeast :
-    ( Nat (N tried Is (Difference a To (Nat1Plus triedMinus1PlusA)))
-    , Nat (N tried Is (Difference atLeastRange To max))
-    )
-    -> { min : Nat (N min Is (Difference (Nat1Plus lessRange) To tried)) }
+    Nat (N tried (IsBoth a To (Nat1Plus triedMinus1PlusA) And atLeastRange To max))
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried)) }
     ->
         { less : Nat (In min triedMinus1PlusA) -> result
         , equalOrGreater : Nat (In tried max) -> result
@@ -197,7 +195,7 @@ isAtLeast :
     -> result
 isAtLeast triedLowerLimit min cases =
     \inNat ->
-        if Internal.toInt inNat >= Internal.toInt (triedLowerLimit |> Tuple.first) then
+        if toInt inNat >= toInt triedLowerLimit then
             .equalOrGreater cases (Internal.newRange inNat)
 
         else
@@ -215,7 +213,7 @@ goToU18Party : { age : Nat (In min Nat17) } -> List Snack
 
 tryToGoToU18Party =
     Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isAtMost ( nat17, nat17 )
+        >> Nat.In.isAtMost nat17
             { min = nat0 }
             { equalOrLess = \age -> Just (goToU18Party { age 0 age })
             , greater = Nothing
@@ -224,10 +222,8 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    ( Nat (N tried Is (Difference a To triedPlusA))
-    , Nat (N tried Is (Difference (Nat1Plus greaterRange) To max))
-    )
-    -> { min : Nat (N min Is (Difference atMostRange To tried)) }
+    Nat (N tried (IsBoth a To triedPlusA And (Nat1Plus greaterRange) To max))
+    -> { min : Nat (N min (Is atMostRange To tried)) }
     ->
         { equalOrLess : Nat (In min triedPlusA) -> result
         , greater : Nat (In tried max) -> result
@@ -236,7 +232,7 @@ isAtMost :
     -> result
 isAtMost triedUpperLimit min cases =
     \inNat ->
-        if toInt inNat <= toInt (triedUpperLimit |> Tuple.first) then
+        if toInt inNat <= (triedUpperLimit |> toInt) then
             .equalOrLess cases (Internal.newRange inNat)
 
         else
@@ -249,7 +245,7 @@ isAtMost triedUpperLimit min cases =
 
     present =
         Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-            >> Nat.In.is ( nat18, nat18 )
+            >> Nat.In.is nat18
                 { min = nat0 }
                 { less = \age -> appropriateToy { age = age }
                 , greater = \age -> appropriateExperience { age = age }
@@ -262,10 +258,8 @@ isAtMost triedUpperLimit min cases =
 
 -}
 is :
-    ( Nat (N tried Is (Difference (Nat1Plus greaterRange) To max))
-    , Nat (N tried Is (Difference a To (Nat1Plus triedPlusAMinus1)))
-    )
-    -> { min : Nat (N min Is (Difference (Nat1Plus lessRange) To tried)) }
+    Nat (N tried (IsBoth (Nat1Plus greaterRange) To max And a To (Nat1Plus triedPlusAMinus1)))
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried)) }
     ->
         { equal : () -> result
         , less : Nat (In min triedPlusAMinus1) -> result
@@ -275,7 +269,7 @@ is :
     -> result
 is tried min cases =
     \inNat ->
-        case compare (toInt inNat) (toInt (tried |> Tuple.first)) of
+        case compare (toInt inNat) (toInt tried) of
             EQ ->
                 .equal cases ()
 
@@ -297,8 +291,7 @@ is tried min cases =
 ```
 justIfBetween3And10 =
     Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isInRange
-            { first = ( nat3, nat3 ), last = ( nat10, nat10 ) }
+        >> Nat.In.isInRange { first = nat3, last = nat10 }
             { min = nat0 }
             { less = \_ -> Nothing
             , greater = \_ -> Nothing
@@ -315,15 +308,11 @@ justIfBetween3And10 (nat123 |> Nat.N.toIn)
 -}
 isInRange :
     { first :
-        ( Nat (N first Is (Difference range To last))
-        , Nat (N first Is (Difference a To (Nat1Plus firstMinus1PlusA)))
-        )
+        Nat (N first (IsBoth range To last And a To (Nat1Plus firstMinus1PlusA)))
     , last :
-        ( Nat (N last Is (Difference (Nat1Plus greaterRange) To max))
-        , Nat (N last Is (Difference a To lastPlusA))
-        )
+        Nat (N last (IsBoth (Nat1Plus greaterRange) To max And a To lastPlusA))
     }
-    -> { min : Nat (N min Is (Difference (Nat1Plus lessRange) To first)) }
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To first)) }
     ->
         { inRange : Nat (In first lastPlusA) -> result
         , less : Nat (In min firstMinus1PlusA) -> result
@@ -333,17 +322,10 @@ isInRange :
     -> result
 isInRange interval min cases =
     \inNat ->
-        let
-            firstInt =
-                .first interval |> Tuple.first |> toInt
-
-            lastInt =
-                .last interval |> Tuple.first |> toInt
-        in
-        if toInt inNat < firstInt then
+        if toInt inNat < (.first interval |> toInt) then
             .less cases (Internal.newRange inNat)
 
-        else if toInt inNat > lastInt then
+        else if toInt inNat > (.last interval |> toInt) then
             .greater cases (Internal.newRange inNat)
 
         else
@@ -363,8 +345,8 @@ isInRange interval min cases =
 -}
 add :
     Nat (In addedMin addedMax)
-    -> Nat (N addedMin Is (Difference min To sumMin))
-    -> Nat (N addedMax Is (Difference max To sumMax))
+    -> Nat (N addedMin (Is min To sumMin))
+    -> Nat (N addedMax (Is max To sumMax))
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
 add added addedMin addedMax =
@@ -373,19 +355,17 @@ add added addedMin addedMax =
 
 {-| Add a fixed `Nat (N ...)` value.
 
-    Nat.N.toIn nat70
-        |> Nat.In.addN ( nat7, nat7 )
+    nat70 |> Nat.N.toIn
+        |> Nat.In.addN nat7
     --> is of type Nat (In Nat77 (Nat77Plus a))
 
 -}
 addN :
-    ( Nat (N added Is (Difference min To sumMin))
-    , Nat (N added Is (Difference max To sumMax))
-    )
+    Nat (N added (IsBoth min To sumMin And max To sumMax))
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
 addN addedNat =
-    Internal.map (\inNat -> inNat + toInt (addedNat |> Tuple.first))
+    Internal.map (\inNat -> inNat + toInt addedNat)
 
 
 {-| Subtract a `Nat (In ...)`.
@@ -404,8 +384,8 @@ If you don't have both at hand, use [`subLossy`](Nat-In#subLossy).
 -}
 sub :
     Nat (In subtractedMin subtractedMax)
-    -> Nat (N subtractedMin Is (Difference differenceMax To max))
-    -> Nat (N subtractedMax Is (Difference differenceMin To min))
+    -> Nat (N subtractedMin (Is differenceMax To max))
+    -> Nat (N subtractedMax (Is differenceMin To min))
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
 sub subtractedInNat subtractedMin subtractedMax =
@@ -437,21 +417,16 @@ subLossy subtractedInNat =
 {-| Subtract a fixed `Nat` value.
 
     nat7 |> Nat.N.toIn
-        |> Nat.In.subN ( nat7, nat7 )
+        |> Nat.In.subN nat7
     --> is of type Nat (In Nat0 a)
 
 -}
 subN :
-    ( Nat (N subtracted Is (Difference differenceMin To min))
-    , Nat (N subtracted Is (Difference differenceMax To max))
-    )
+    Nat (N subtracted (IsBoth differenceMin To min And differenceMax To max))
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
 subN subtractedNNat =
-    Internal.map
-        (\inNat ->
-            inNat - toInt (subtractedNNat |> Tuple.first)
-        )
+    Internal.map (\x -> x - toInt subtractedNNat)
 
 
 {-| Divide (`//`) by a `Nat (Min ...)`. `div 0` is impossible.
@@ -526,7 +501,7 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 
 -}
 maxIs :
-    Nat (N max Is (Difference a To maxPlusA))
+    Nat (N max (Is a To maxPlusA))
     -> Nat (In min max)
     -> Nat (In min maxPlusA)
 maxIs =

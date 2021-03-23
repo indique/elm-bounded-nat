@@ -1,6 +1,6 @@
 module Internal exposing (Nat(..), add1, map, newRange, sub1, toInt)
 
-import Nat.Bound exposing (Difference, Is, N, To)
+import Nat.Bound exposing (And, IsBoth, N, To)
 import Nat.N.Type exposing (..)
 
 
@@ -24,14 +24,23 @@ newRange =
 
 
 add1 :
-    Nat (N n Is (Difference a To nPlusA))
-    -> Nat (N (Nat1Plus n) Is (Difference a To (Nat1Plus nPlusA)))
+    Nat (N n (IsBoth a To nPlusA And b To nPlusB))
+    ->
+        Nat
+            (N
+                (Nat1Plus n)
+                (IsBoth a To (Nat1Plus nPlusA) And b To (Nat1Plus nPlusB))
+            )
 add1 =
     map ((+) 1)
 
 
 sub1 :
-    Nat (N (Nat1Plus nMinus1) Is (Difference a To (Nat1Plus nMinus1PlusA)))
-    -> Nat (N nMinus1 Is (Difference a To nMinus1PlusA))
+    Nat
+        (N
+            (Nat1Plus nMinus1)
+            (IsBoth a To (Nat1Plus nMinus1PlusA) And b To (Nat1Plus nMinus1PlusB))
+        )
+    -> Nat (N nMinus1 (IsBoth a To nMinus1PlusA And b To nMinus1PlusB))
 sub1 =
     map (\x -> x - 1)

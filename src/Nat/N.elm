@@ -29,7 +29,7 @@ import Nat.N.Type exposing (..)
     --> is of type Nat (Min Nat4)
 
 -}
-toMin : Nat (N n Is difference) -> Nat (Min n)
+toMin : Nat (N n isDifference) -> Nat (Min n)
 toMin =
     Internal.newRange
 
@@ -40,7 +40,7 @@ The minimum is `n`, the maximum `>= n`.
 
 -}
 toIn :
-    Nat (N n Is (Difference a To nPlusA))
+    Nat (N n (Is a To nPlusA))
     -> Nat (In n nPlusA)
 toIn =
     Internal.newRange
@@ -53,8 +53,13 @@ rather go for [`Nat (In ...)`](Nat-In) or [`Nat (Min ...)`](Nat-Min).
 
 -}
 add1 :
-    Nat (N n Is (Difference a To nPlusA))
-    -> Nat (N (Nat1Plus n) Is (Difference a To (Nat1Plus nPlusA)))
+    Nat (N n (IsBoth a To nPlusA And b To nPlusB))
+    ->
+        Nat
+            (N
+                (Nat1Plus n)
+                (IsBoth a To (Nat1Plus nPlusA) And b To (Nat1Plus nPlusB))
+            )
 add1 =
     Internal.add1
 
@@ -66,7 +71,11 @@ rather go for [`Nat (In ...)`](Nat-Bound#In) or [`Nat (Min ...)`](Nat-Bound#Min)
 
 -}
 sub1 :
-    Nat (N (Nat1Plus nMinus1) Is (Difference a To (Nat1Plus nMinus1PlusA)))
-    -> Nat (N nMinus1 Is (Difference a To nMinus1PlusA))
+    Nat
+        (N
+            (Nat1Plus nMinus1)
+            (IsBoth a To (Nat1Plus nMinus1PlusA) And b To (Nat1Plus nMinus1PlusB))
+        )
+    -> Nat (N nMinus1 (IsBoth a To nMinus1PlusA And b To nMinus1PlusB))
 sub1 =
     Internal.sub1

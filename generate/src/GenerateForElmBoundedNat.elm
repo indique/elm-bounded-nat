@@ -226,18 +226,19 @@ nAnn :
 nAnn a difference =
     typed "N"
         [ a
-        , typed "Is" []
         , difference
         ]
 
 
-differenceAnn :
-    Elm.CodeGen.TypeAnnotation
+isBothAnn :
+    (Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation)
     -> Elm.CodeGen.TypeAnnotation
-    -> Elm.CodeGen.TypeAnnotation
-differenceAnn a nPlusA =
-    typed "Difference"
-        [ a, typed "To" [], nPlusA ]
+isBothAnn nPlus =
+    typed "IsBoth"
+        [ typeVar "a", typed "To" [], nPlus (typeVar "a")
+        , typed "And" []
+        , typeVar "b", typed "To" [], nPlus (typeVar "b")
+        ]
 
 
 natXPlusAnn : Int -> Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation
@@ -255,7 +256,7 @@ zeroAnn =
     natNAnn
         (nAnn
             (typed "Nat0" [])
-            (differenceAnn (typeVar "a") (typeVar "a"))
+            (isBothAnn identity)
         )
 
 
@@ -280,7 +281,7 @@ natNsModule =
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
-                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for a detailed explanation."
+                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for a explanation."
                     , docTagsFrom NatNsValue declarations
                     ]
             }
@@ -289,7 +290,7 @@ natNsModule =
             (exposingExplicit [ typeOrAliasExpose "Nat" ])
         , importStmt [ "Nat", "Bound" ] noAlias
             (exposingExplicit
-                ([ "Difference", "Is", "N", "To" ]
+                ([ "And", "IsBoth", "N", "To" ]
                     |> List.map typeOrAliasExpose
                 )
             )
@@ -317,9 +318,7 @@ natNsModule =
                         (natNAnn
                             (nAnn
                                 (typed ("Nat" ++ String.fromInt x) [])
-                                (differenceAnn (typeVar "a")
-                                    (natXPlusAnn x (typeVar "a"))
-                                )
+                                (isBothAnn (natXPlusAnn x))
                             )
                         )
                         ("nat" ++ String.fromInt x)
