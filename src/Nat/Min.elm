@@ -259,7 +259,7 @@ subIn :
     -> Nat (Min min)
     -> Nat (Min differenceMin)
 subIn subtractedInNat subtractedMax =
-    Internal.map (\base -> base - toInt subtractedInNat)
+    Internal.map (\x -> x - toInt subtractedInNat)
 
 
 {-| Subtract a `Nat (In ..)` safely, but without calculating the new minimum.

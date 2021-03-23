@@ -1,6 +1,6 @@
 module Nat exposing
     ( Nat
-    , toInt
+    , toInt, bi
     , theGreater, theSmaller
     )
 
@@ -11,7 +11,7 @@ module Nat exposing
 
 ## transform
 
-@docs toInt
+@docs toInt, bi
 
 
 ## compare
@@ -51,9 +51,10 @@ type alias Nat range =
 {-| Convert a `Nat` to an `Int`.
 
     nat4 |> Nat.toInt --> 4
-    Nat.N.toIn nat4 |> Nat.toInt --> 4
-    Nat.N.toMin nat4 |> Nat.toInt --> 4
+    nat4 |> Nat.N.toIn |> Nat.toInt --> 4
+    nat4 |> Nat.N.toMin |> Nat.toInt --> 4
 
+    compare : Nat range -> Nat range -> Order
     compare a b =
         compare (Nat.toInt a) (Nat.toInt b)
 
@@ -73,7 +74,11 @@ toInt =
 -}
 theGreater : Nat range -> Nat range -> Nat range
 theGreater a b =
-    max (toInt a) (toInt b) |> Internal.Nat
+    if bi (>) a b then
+        a
+
+    else
+        b
 
 
 {-| The smaller of 2 `Nat`s. Works just like `Basics.min`.
@@ -86,4 +91,28 @@ theGreater a b =
 -}
 theSmaller : Nat range -> Nat range -> Nat range
 theSmaller a b =
-    min (toInt a) (toInt b) |> Internal.Nat
+    if bi (<) a b then
+        a
+
+    else
+        b
+
+
+{-| Use the `Int` values of two `Nat`s to return a result.
+
+    Nat.bi (>=) nat5 nat4 --> True
+
+    Nat.bi (>=) nat5 nat40 --> False
+
+Note, that you must give the `Nat`s in the same order you would give `Int`s.
+
+Don't overuse this.
+
+-}
+bi :
+    (Int -> Int -> result)
+    -> Nat aRange
+    -> Nat bRange
+    -> result
+bi op a b =
+    op (toInt a) (toInt b)

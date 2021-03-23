@@ -41,9 +41,8 @@ If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 -}
 
 import Internal
-import Nat exposing (Nat, toInt)
+import Nat exposing (Nat, bi, toInt)
 import Nat.Bound exposing (..)
-import Nat.N
 import Nat.N.Type exposing (..)
 import Nat.Ns exposing (..)
 import Random
@@ -195,7 +194,7 @@ isAtLeast :
     -> result
 isAtLeast triedLowerLimit min cases =
     \inNat ->
-        if toInt inNat >= toInt triedLowerLimit then
+        if bi (>=) inNat triedLowerLimit then
             .equalOrGreater cases (Internal.newRange inNat)
 
         else
@@ -269,7 +268,7 @@ is :
     -> result
 is tried min cases =
     \inNat ->
-        case compare (toInt inNat) (toInt tried) of
+        case bi compare inNat tried of
             EQ ->
                 .equal cases ()
 
@@ -322,10 +321,10 @@ isInRange :
     -> result
 isInRange interval min cases =
     \inNat ->
-        if toInt inNat < (.first interval |> toInt) then
+        if bi (<) inNat (.first interval) then
             .less cases (Internal.newRange inNat)
 
-        else if toInt inNat > (.last interval |> toInt) then
+        else if bi (>) inNat (.last interval) then
             .greater cases (Internal.newRange inNat)
 
         else
@@ -440,7 +439,7 @@ div :
     -> Nat (In min max)
     -> Nat (In Nat0 max)
 div minNat =
-    Internal.map (\base -> base // Internal.toInt minNat)
+    Internal.map (\x -> x // toInt minNat)
 
 
 {-| The remainder after division. `remainderBy 0` is impossible.
@@ -454,7 +453,7 @@ remainderBy :
     -> Nat (In min max)
     -> Nat (In Nat0 max)
 remainderBy minNat =
-    Internal.map (Basics.remainderBy (minNat |> Internal.toInt))
+    Internal.map (Basics.remainderBy (minNat |> toInt))
 
 
 
@@ -511,7 +510,8 @@ maxIs =
 {-| Convert a `Nat (In ...)` to a `Nat (Min ...)`.
 
     squareAInNat =
-        Nat.In.dropMax >> Nat.Min.toPower (nat2 |> Nat.N.toMin)
+        Nat.In.dropMax
+            >> Nat.Min.toPower (nat2 |> Nat.N.toMin)
 
 -}
 dropMax : Nat (In min max) -> Nat (Min min)
@@ -536,7 +536,7 @@ range :
     -> Nat (In lastMin lastMax)
     -> List (Nat (In firstMin lastMax))
 range first last =
-    List.range (toInt first) (toInt last)
+    bi List.range first last
         |> List.map Internal.Nat
 
 
@@ -547,5 +547,5 @@ random :
     -> Nat (In lastMin lastMax)
     -> Random.Generator (Nat (In firstMin lastMax))
 random min max =
-    Random.int (toInt min) (toInt max)
+    bi Random.int min max
         |> Random.map Internal.Nat
