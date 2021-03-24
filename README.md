@@ -52,8 +52,12 @@ They can prove it by
   grey float =
       let
           from0To100 =
-              (float * 100) |> floor
-                  |> Nat.In.intInRange nat0 nat100 --easy
+              float
+                  * 100
+                  >> floor
+                  >> Nat.In.intInRange
+                      (nat0 |> Nat.N.toIn)
+                      (nat100 |> Nat.N.toIn)
       in
       rgbPer100 from0To100 from0To100 from0To100
   ```
@@ -64,16 +68,19 @@ They can prove it by
   -- → We know the EXACT value
       |> Nat.N.toIn
       -- → it must also be in range 100 to 100 + ...
+  
   red =
-    rgbPer100 (nat100 |> Nat.N.toIn)
-        (nat0 |> Nat.N.toIn) (nat0 |> Nat.N.toIn)
+      rgbPer100
+          (nat100 |> Nat.N.toIn)
+          (nat0 |> Nat.N.toIn)
+          (nat0 |> Nat.N.toIn)
         -- 👍
   ```
 - checking
   ```elm
   isUserIntANat : Int -> Maybe (Nat (Min Nat0))
   isUserIntANat =
-      Nat.Min.isAtLeast nat0
+      Nat.Min.intAtLeast (nat0 |> Nat.N.toIn)
           { equalOrGreater = Just
           , less = \_-> Nothing
           }
@@ -168,7 +175,7 @@ safeFactorial =
 - keep _as much type information as possible_ and drop it only where you need to.
     ```elm
     squaresTo10 =
-        Nat.In.range nat0 nat10
+        Nat.In.range (nat0 |> Nat.N.toIn) (nat10 |> Nat.N.toIn)
             --nats from 0 to 10
             |> List.map
                 (Nat.Min.dropMax
@@ -182,7 +189,7 @@ safeFactorial =
     
     Instead of accepting only values where you know the values exact
   ```elm
-  rgb : Nat (N red Is (Difference inverseRed To Nat100)) --...
+  rgb : Nat (N red (Is inverseRed To Nat100) x) --...
   ```
     accept values that are somewhere in a range.
   ```elm

@@ -223,21 +223,22 @@ nAnn :
     Elm.CodeGen.TypeAnnotation
     -> Elm.CodeGen.TypeAnnotation
     -> Elm.CodeGen.TypeAnnotation
-nAnn a difference =
+    -> Elm.CodeGen.TypeAnnotation
+nAnn a difference otherDifference =
     typed "N"
         [ a
         , difference
+        , otherDifference
         ]
 
 
-isBothAnn :
-    (Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation)
+isAnn :
+    String
+    -> (Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation)
     -> Elm.CodeGen.TypeAnnotation
-isBothAnn nPlus =
-    typed "IsBoth"
-        [ typeVar "a", typed "To" [], nPlus (typeVar "a")
-        , typed "And" []
-        , typeVar "b", typed "To" [], nPlus (typeVar "b")
+isAnn var nPlus =
+    typed "Is"
+        [ typeVar var, typed "To" [], nPlus (typeVar var)
         ]
 
 
@@ -256,7 +257,8 @@ zeroAnn =
     natNAnn
         (nAnn
             (typed "Nat0" [])
-            (isBothAnn identity)
+            (isAnn "a" identity)
+            (isAnn "b" identity)
         )
 
 
@@ -290,7 +292,7 @@ natNsModule =
             (exposingExplicit [ typeOrAliasExpose "Nat" ])
         , importStmt [ "Nat", "Bound" ] noAlias
             (exposingExplicit
-                ([ "And", "IsBoth", "N", "To" ]
+                ([ "Is", "N", "To" ]
                     |> List.map typeOrAliasExpose
                 )
             )
@@ -318,7 +320,8 @@ natNsModule =
                         (natNAnn
                             (nAnn
                                 (typed ("Nat" ++ String.fromInt x) [])
-                                (isBothAnn (natXPlusAnn x))
+                                (isAnn "a" (natXPlusAnn x))
+                                (isAnn "b" (natXPlusAnn x))
                             )
                         )
                         ("nat" ++ String.fromInt x)

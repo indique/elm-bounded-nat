@@ -98,8 +98,8 @@ intInRange lowerLimit upperLimit =
 
 -}
 atMost :
-    Nat (N newMax (Is a To newMaxPlusA))
-    -> { min : Nat (N min (Is newRange To newMax)) }
+    Nat (N newMax (Is a To newMaxPlusA) x)
+    -> { min : Nat (N min (Is newRange To newMax) y) }
     -> Nat (In min oldMax)
     -> Nat (In min newMaxPlusA)
 atMost higherLimit min =
@@ -184,8 +184,8 @@ tryToVote =
 
 -}
 isAtLeast :
-    Nat (N tried (IsBoth a To (Nat1Plus triedMinus1PlusA) And atLeastRange To max))
-    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried)) }
+    Nat (N tried (Is a To (Nat1Plus triedMinus1PlusA)) (Is atLeastRange To max))
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried) x) }
     ->
         { less : Nat (In min triedMinus1PlusA) -> result
         , equalOrGreater : Nat (In tried max) -> result
@@ -221,8 +221,8 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    Nat (N tried (IsBoth a To triedPlusA And (Nat1Plus greaterRange) To max))
-    -> { min : Nat (N min (Is atMostRange To tried)) }
+    Nat (N tried (Is a To triedPlusA) (Is (Nat1Plus greaterRange) To max))
+    -> { min : Nat (N min (Is atMostRange To tried) x) }
     ->
         { equalOrLess : Nat (In min triedPlusA) -> result
         , greater : Nat (In tried max) -> result
@@ -257,8 +257,8 @@ isAtMost triedUpperLimit min cases =
 
 -}
 is :
-    Nat (N tried (IsBoth (Nat1Plus greaterRange) To max And a To (Nat1Plus triedPlusAMinus1)))
-    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried)) }
+    Nat (N tried (Is (Nat1Plus greaterRange) To max) (Is a To (Nat1Plus triedPlusAMinus1)))
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To tried) x) }
     ->
         { equal : () -> result
         , less : Nat (In min triedPlusAMinus1) -> result
@@ -307,11 +307,11 @@ justIfBetween3And10 (nat123 |> Nat.N.toIn)
 -}
 isInRange :
     { first :
-        Nat (N first (IsBoth range To last And a To (Nat1Plus firstMinus1PlusA)))
+        Nat (N first (Is range To last) (Is a To (Nat1Plus firstMinus1PlusA)))
     , last :
-        Nat (N last (IsBoth (Nat1Plus greaterRange) To max And a To lastPlusA))
+        Nat (N last (Is (Nat1Plus greaterRange) To max) (Is a To lastPlusA))
     }
-    -> { min : Nat (N min (Is (Nat1Plus lessRange) To first)) }
+    -> { min : Nat (N min (Is (Nat1Plus lessRange) To first) x) }
     ->
         { inRange : Nat (In first lastPlusA) -> result
         , less : Nat (In min firstMinus1PlusA) -> result
@@ -344,8 +344,8 @@ isInRange interval min cases =
 -}
 add :
     Nat (In addedMin addedMax)
-    -> Nat (N addedMin (Is min To sumMin))
-    -> Nat (N addedMax (Is max To sumMax))
+    -> Nat (N addedMin (Is min To sumMin) x)
+    -> Nat (N addedMax (Is max To sumMax) y)
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
 add added addedMin addedMax =
@@ -360,7 +360,7 @@ add added addedMin addedMax =
 
 -}
 addN :
-    Nat (N added (IsBoth min To sumMin And max To sumMax))
+    Nat (N added (Is min To sumMin) (Is max To sumMax))
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
 addN addedNat =
@@ -383,8 +383,8 @@ If you don't have both at hand, use [`subLossy`](Nat-In#subLossy).
 -}
 sub :
     Nat (In subtractedMin subtractedMax)
-    -> Nat (N subtractedMin (Is differenceMax To max))
-    -> Nat (N subtractedMax (Is differenceMin To min))
+    -> Nat (N subtractedMin (Is differenceMax To max) x)
+    -> Nat (N subtractedMax (Is differenceMin To min) y)
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
 sub subtractedInNat subtractedMin subtractedMax =
@@ -421,7 +421,7 @@ subLossy subtractedInNat =
 
 -}
 subN :
-    Nat (N subtracted (IsBoth differenceMin To min And differenceMax To max))
+    Nat (N subtracted (Is differenceMin To min) (Is differenceMax To max))
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
 subN subtractedNNat =
@@ -500,7 +500,7 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 
 -}
 maxIs :
-    Nat (N max (Is a To maxPlusA))
+    Nat (N max (Is a To maxPlusA) x)
     -> Nat (In min max)
     -> Nat (In min maxPlusA)
 maxIs =

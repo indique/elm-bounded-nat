@@ -90,7 +90,7 @@ lowerMin =
 -}
 atMost :
     Nat (In max maxPlusA)
-    -> { min : Nat (N min (Is range To max)) }
+    -> { min : Nat (N min (Is range To max) x) }
     -> Nat (Min min)
     -> Nat (In min maxPlusA)
 atMost upperLimit min =
@@ -164,9 +164,11 @@ isIntAtLeast minimum int =
 
 {-| A `Nat (Min ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
 
-    9 |> Nat.Min.intAtLeast nat3 --> Nat 9
+    9 |> Nat.Min.intAtLeast (nat3 |> Nat.N.toMin)
+    --> Nat 9
 
-    0 |> Nat.Min.intAtLeast nat3 --> Nat 3
+    0 |> Nat.Min.intAtLeast (nat3 |> Nat.N.toMin)
+    --> Nat 3
 
 You can also use this if you know an `Int` must be at least `minimum`.
 
@@ -205,7 +207,7 @@ If you have don't the minimum added value at hand, use [`addLossy`](Nat-Min#addL
 -}
 add :
     Nat (Min addedMin)
-    -> Nat (N addedMin (Is min To sumMin))
+    -> Nat (N addedMin (Is min To sumMin) x)
     -> Nat (Min min)
     -> Nat (Min sumMin)
 add addedMinNat addedMin =
@@ -238,7 +240,7 @@ addLossy addedMinNat =
 
 -}
 addN :
-    Nat (N added (Is min To sumMin))
+    Nat (N added (Is min To sumMin) x)
     -> Nat (Min min)
     -> Nat (Min sumMin)
 addN nNat =
@@ -255,7 +257,7 @@ If you have don't the maximum subtracted value at hand, use [`subInLossy`](Nat-M
 -}
 subIn :
     Nat (In subtractedMin subtractedMax)
-    -> Nat (N subtractedMax (Is differenceMin To min))
+    -> Nat (N subtractedMax (Is differenceMin To min) x)
     -> Nat (Min min)
     -> Nat (Min differenceMin)
 subIn subtractedInNat subtractedMax =
@@ -287,7 +289,7 @@ subInLossy subtractedInNat =
 
 -}
 subN :
-    Nat (N subtracted (Is differenceMin To min))
+    Nat (N subtracted (Is differenceMin To min) x)
     -> Nat (Min min)
     -> Nat (Min differenceMin)
 subN nNat =
@@ -390,7 +392,7 @@ toPower power =
 -}
 is :
     Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA))
-    -> { min : Nat (N min (Is lessRange To triedMinus1)) }
+    -> { min : Nat (N min (Is lessRange To triedMinus1) x) }
     ->
         { equal : () -> result
         , less : Nat (In min triedMinus1PlusA) -> result
@@ -437,7 +439,7 @@ factorial =
 -}
 isAtLeast :
     Nat (In triedMin (Nat1Plus triedMinMinus1PlusA))
-    -> { min : Nat (N min (Is lessRange To triedMin)) }
+    -> { min : Nat (N min (Is lessRange To triedMin) x) }
     ->
         { less : Nat (In min triedMinMinus1PlusA) -> result
         , equalOrGreater : Nat (Min triedMin) -> result
@@ -474,7 +476,7 @@ tryToGoToU18Party =
 -}
 isAtMost :
     Nat (In atMostMin atMostMinPlusA)
-    -> { min : Nat (N min (Is minToAtMostMin To atMostMin)) }
+    -> { min : Nat (N min (Is minToAtMostMin To atMostMin) x) }
     ->
         { equalOrLess : Nat (In min atMostMinPlusA) -> result
         , greater : Nat (Min atMostMin) -> result
