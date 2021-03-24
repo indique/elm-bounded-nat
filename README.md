@@ -15,7 +15,7 @@ Setup
 ```elm
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-    --In, Min, Only, N, Difference, Is, To
+    --In, Min, Only, N, Is, To
 import Nat.Min
 import Nat.In
 import Nat.N
