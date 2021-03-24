@@ -283,7 +283,7 @@ natNsModule =
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
-                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for a explanation."
+                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for an explanation."
                     , docTagsFrom NatNsValue declarations
                     ]
             }

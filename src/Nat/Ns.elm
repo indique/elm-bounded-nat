@@ -21,7 +21,7 @@ module Nat.Ns exposing
 
 {-| `Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`.
 
-See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for a explanation.
+See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for an explanation.
 
 @docs nat0, nat1, nat10, nat100, nat101, nat102, nat103, nat104, nat105, nat106, nat107
 @docs nat108, nat109, nat11, nat110, nat111, nat112, nat113, nat114, nat115, nat116
