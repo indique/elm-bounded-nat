@@ -2,6 +2,7 @@
 
 Current attempts of represening natural numbers `>= 0` only have quite lose promises.
 
+- Could the type prevent undesired arguments, like `/ 0`?
 - If you know that your `Nat` is >= 3, why can't you subtract 1 or 2 or 3?
 
 This package contains many ways to ensure that a `Nat` is in a range _at compile-time_.
