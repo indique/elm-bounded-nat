@@ -1,7 +1,7 @@
-module Nat.In exposing
-    ( intInRange, atLeast, atMost
-    , is, isInRange, isIntInRange, isAtLeast, isAtMost
-    , addN, subN, add, sub, div, remainderBy, subLossy
+module InNat exposing
+    ( atLeast, atMost
+    , is, isInRange, isAtLeast, isAtMost
+    , addN, subN, add, sub, div, remainderBy, subLossy, addLossy, mul, toPower, subLossyMax
     , lowerMin, maxIs, dropMax
     , random, range
     )
@@ -14,19 +14,17 @@ module Nat.In exposing
 
 ### clamp
 
-@docs intInRange, atLeast, atMost
+@docs atLeast, atMost
 
 
 ### compare
 
-@docs is, isInRange, isIntInRange, isAtLeast, isAtMost
+@docs is, isInRange, isAtLeast, isAtMost
 
 
 ## modify
 
-@docs addN, subN, add, sub, div, remainderBy, subLossy
-
-If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
+@docs addN, subN, add, sub, div, remainderBy, subLossy, addLossy, mul, toPower, subLossyMax
 
 
 ## drop information
@@ -41,10 +39,11 @@ If you want other operations like multiply, use [dropMax](Nat-In#dropMax).
 -}
 
 import Internal
+import NNat
+import NNats exposing (..)
 import Nat exposing (Nat, bi, toInt)
 import Nat.Bound exposing (..)
 import Nat.N.Type exposing (..)
-import Nat.Ns exposing (..)
 import Random
 
 
@@ -53,54 +52,29 @@ import Random
 -- ### clamp
 
 
-{-| A `Nat (In ...)` from an `Int`, **clamped** between a minimum & maximum.
-
-  - if the `Int < minimum`, `minimum` is returned
-  - if the `Int > maximum`, `maximum` is returned
-
-```
-clampBetween3And12 =
-    Nat.In.intInRange (nat3 |> Nat.N.toIn) (nat12 |> Nat.N.toIn)
-
-9 |> clampBetween3And12 --> Nat 9
-
-0 |> clampBetween3And12 --> Nat 3
-
-99 |> clampBetween3And12 --> Nat 12
-```
-
-If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIntInRange`](Nat-In#isIntInRange).
-
--}
-intInRange :
-    Nat (In min firstMax)
-    -> Nat (In firstMax max)
-    -> Int
-    -> Nat (In min max)
-intInRange lowerLimit upperLimit =
-    max (lowerLimit |> toInt)
-        >> min (upperLimit |> toInt)
-        >> Internal.Nat
-
-
 {-| **Cap** the `Nat (In ...)` to at most a number.
 
-    nat5 |> Nat.N.toIn
-        |> Nat.In.atMost nat10 { min = nat5 }
-    --> Nat.In 5
+    nat5 |> NNat.toIn
+        |> InNat.atMost (nat10 |> NNat.toIn) { min = nat5 }
+    --> InNat 5
 
-    nat15 |> Nat.N.toIn
-        |> Nat.In.lowerMin (nat5 |> Nat.N.toIn)
-        |> Nat.In.atMost nat10 { min = nat5 }
+    nat15 |> NNat.toIn |> InNat.lowerMin (nat5 |> NNat.toIn)
+        |> InNat.atMost (nat10 |> NNat.toIn) { min = nat5 }
     --> Nat 10
 
 `min` ensures that that number is at least the minimum.
 
+The maximum can also be `Infinity`.
+
+    nat5 |> NNat.dropMax
+        |> InNat.atMost (nat10 |> NNat.toIn) { min = nat5 }
+    --> Nat 5
+
 -}
 atMost :
-    Nat (N newMax (Is a To newMaxPlusA) x)
+    Nat (In newMax newMaxPlusA)
     -> { min : Nat (N min (Is newRange To newMax) y) }
-    -> Nat (In min oldMax)
+    -> Nat (In min max)
     -> Nat (In min newMaxPlusA)
 atMost higherLimit min =
     Internal.map (Basics.min (higherLimit |> toInt))
@@ -108,12 +82,18 @@ atMost higherLimit min =
 
 {-| If the `Nat (In ...)` is less than a number, return that number instead.
 
-    nat5 |> Nat.N.toIn
-        |> Nat.In.atLeast nat10
+    nat5 |> NNat.toIn
+        |> InNat.atLeast nat10
     --> Nat 10
 
-    nat15 |> Nat.N.toIn
-        |> Nat.In.atLeast (nat10 |> Nat.N.toIn)
+    nat15 |> NNat.toIn
+        |> InNat.atLeast (nat10 |> NNat.toIn)
+    --> Nat 15
+
+Notice that this also works, if the `max` is `Infinity`.
+
+    nat15 |> NNat.dropMax
+        |> InNat.atLeast (nat10 |> NNat.dropMax)
     --> Nat 15
 
 -}
@@ -129,41 +109,6 @@ atLeast lowerLimit =
 -- ## compare
 
 
-{-| An `Int` compared to a range from `first` to `last`.
-
-    rejectOrAcceptUserInt =
-        isIntInRange (nat1 |> Nat.N.toIn) (nat100 |> Nat.N.toIn)
-            { less = Err "must be >= 1"
-            , greater = \_-> Err "must be <= 100"
-            , inRange = Ok
-            }
-
-    rejectOrAcceptUserInt (Nat.N.toIn nat0)
-    --> Err "must be >= 1"
-
--}
-isIntInRange :
-    { first : Nat (In minFirst last)
-    , last : Nat (In last lastPlusA)
-    }
-    ->
-        { less : () -> result
-        , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (In minFirst lastPlusA) -> result
-        }
-    -> Int
-    -> result
-isIntInRange interval cases int =
-    if int < toInt (.first interval) then
-        .less cases ()
-
-    else if int > toInt (.last interval) then
-        .greater cases (int |> Internal.Nat)
-
-    else
-        .inRange cases (int |> Internal.Nat)
-
-
 {-| Is the `Nat (In ...)`
 
   - `equalOrGreater` than a `Nat` or
@@ -174,8 +119,8 @@ isIntInRange interval cases int =
 vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
 
 tryToVote =
-    Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isAtLeast nat18
+    InNat.lowerMin (nat0 |> NNat.toIn)
+        >> InNat.isAtLeast nat18
             { min = nat0 }
             { less = Nothing --😓
             , equalOrGreater = \age -> Just (vote { age = age })
@@ -211,8 +156,8 @@ isAtLeast triedLowerLimit min cases =
 goToU18Party : { age : Nat (In min Nat17) } -> List Snack
 
 tryToGoToU18Party =
-    Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isAtMost nat17
+    InNat.lowerMin (nat0 |> NNat.toIn)
+        >> InNat.isAtMost nat17
             { min = nat0 }
             { equalOrLess = \age -> Just (goToU18Party { age 0 age })
             , greater = Nothing
@@ -243,8 +188,8 @@ isAtMost triedUpperLimit min cases =
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
     present =
-        Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-            >> Nat.In.is nat18
+        InNat.lowerMin (nat0 |> NNat.toIn)
+            >> InNat.is nat18
                 { min = nat0 }
                 { less = \age -> appropriateToy { age = age }
                 , greater = \age -> appropriateExperience { age = age }
@@ -289,18 +234,18 @@ is tried min cases =
 
 ```
 justIfBetween3And10 =
-    Nat.In.lowerMin (nat0 |> Nat.N.toIn)
-        >> Nat.In.isInRange { first = nat3, last = nat10 }
+    InNat.lowerMin (nat0 |> NNat.toIn)
+        >> InNat.isInRange { first = nat3, last = nat10 }
             { min = nat0 }
             { less = \_ -> Nothing
             , greater = \_ -> Nothing
             , inRange = Just
             }
 
-justIfBetween3And10 (nat9 |> Nat.N.toIn)
+justIfBetween3And10 (nat9 |> NNat.toIn)
 --> Just (Nat 9)
 
-justIfBetween3And10 (nat123 |> Nat.N.toIn)
+justIfBetween3And10 (nat123 |> NNat.toIn)
 --> Nothing
 ```
 
@@ -337,8 +282,8 @@ isInRange interval min cases =
 
 {-| Add a `Nat (In ...)`.
 
-    Nat.N.toIn nat3
-        |> Nat.In.add between1And12 nat1 nat12
+    NNat.toIn nat3
+        |> InNat.add between1And12 nat1 nat12
     --> of type Nat (In Nat4 (Nat15Plus a))
 
 -}
@@ -348,23 +293,50 @@ add :
     -> Nat (N addedMax (Is max To sumMax) y)
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
-add added addedMin addedMax =
-    Internal.map ((+) (toInt added))
+add inNatToAdd addedMin addedMax =
+    Internal.add inNatToAdd
 
 
 {-| Add a fixed `Nat (N ...)` value.
 
-    nat70 |> Nat.N.toIn
-        |> Nat.In.addN nat7
+    nat70 |> NNat.toIn
+        |> InNat.addN nat7
     --> is of type Nat (In Nat77 (Nat77Plus a))
+
+Use [`MinNat.addN`] if the maximum value is `Infinity`.
 
 -}
 addN :
     Nat (N added (Is min To sumMin) (Is max To sumMax))
     -> Nat (In min max)
     -> Nat (In sumMin sumMax)
-addN addedNat =
-    Internal.map (\inNat -> inNat + toInt addedNat)
+addN nNatToAdd =
+    Internal.add nNatToAdd
+
+
+{-| Add a `Nat (In ...)`, but
+
+  - keep the current minimum, instead of computing the exact value
+
+  - use `Infinity` as the maximum instead of computing the exact value
+
+    atLeast5 |> MinNat.addLossy atLeast2
+    --> is of type Nat (Min Nat5)
+
+    atLeast2 |> MinNat.addLossy atLeast5
+    --> is of type Nat (Min Nat2)
+
+Either of the 2 added `Nat`s can bhave a maximum of `Infinity`.
+
+If you know the minimum and maximum added value at hand, use [`add`](InNat#add).
+
+-}
+addLossy :
+    Nat (In addedMin addedMax)
+    -> Nat (In min max)
+    -> Nat (Min min)
+addLossy inNatToAdd =
+    Internal.add inNatToAdd
 
 
 {-| Subtract a `Nat (In ...)`.
@@ -374,102 +346,211 @@ The 2 following arguments are
   - the minimum subtracted value
   - the maximum subtracted value
 
-If you don't have both at hand, use [`subLossy`](Nat-In#subLossy).
+If you don't have both at hand, use [`subLossy`](InNat#subLossy).
 
-    nat6 |> Nat.N.toIn
-        |> Nat.In.sub between1And5 nat1 nat5
+    nat6 |> NNat.toIn
+        |> InNat.sub between1And5 nat1 nat5
     --> is of type Nat (In Nat1 (Nat5Plus a))
 
 -}
 sub :
-    Nat (In subtractedMin subtractedMax)
-    -> Nat (N subtractedMin (Is differenceMax To max) x)
-    -> Nat (N subtractedMax (Is differenceMin To min) y)
+    Nat (In minSubtracted maxSubtracted)
+    -> Nat (N minSubtracted (Is differenceMax To max) x)
+    -> Nat (N maxSubtracted (Is differenceMin To min) y)
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
-sub subtractedInNat subtractedMin subtractedMax =
-    Internal.map (\x -> x - toInt subtractedInNat)
+sub inNatToSubtract minSubtracted maxSubtracted =
+    Internal.sub inNatToSubtract
 
 
-{-| Subtract a `Nat (In ..)` safely, but without calculating the new bounds.
+{-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat (In ...)`.
 
-    nat6 |> Nat.N.toIn
-        |> Nat.In.subLossy between1And5
-    --> is of type Nat (In Nat0 (Nat6Plus a))
+    in6To10 |> InNat.subLossyMax in0To5 nat5
+    --> is of type Nat (In Nat1 (Nat10Plus a))
 
-If you have both
+If you also know the minimum subtracted value, use [`sub`](InNat#sub).
 
-  - the minimum subtracted value
-  - the maximum subtracted value
+If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#subLossy).
 
-at hand, use [`sub`](Nat-In#sub).
+-}
+subLossyMax :
+    Nat (In minSubtracted maxSubtracted)
+    -> Nat (N maxSubtracted (Is differenceMin To min) x)
+    -> Nat (In min max)
+    -> Nat (In differenceMin max)
+subLossyMax inNatToSubtract maxSubtracted =
+    sub (inNatToSubtract |> lowerMin (nat0 |> NNat.toIn))
+        nat0
+        maxSubtracted
+
+
+{-| Subtract a `Nat (In ..)` without
+
+  - calculating the new minimum, the lowest possible value it can be after the subtraction is 0
+
+```
+nat6 |> NNat.dropMax
+    |> InNat.subLossy between1And5
+--> is of type Nat (In Nat0 Infinity)
+
+nat6 |> NNat.toIn
+    |> InNat.subLossy between1And5
+--> is of type Nat (In Nat0 (Nat6Plus a))
+```
+
+If you know the maximum subtracted value, use [`subLossyMax`](InNat#subLossyMax).
+
+If you also know the minimum subtracted value, use [`sub`](InNat#sub).
 
 -}
 subLossy :
-    Nat (In subtractedMin min)
+    Nat (In minSubtracted min)
     -> Nat (In min max)
     -> Nat (In Nat0 max)
-subLossy subtractedInNat =
-    Internal.map (\x -> x - toInt subtractedInNat)
+subLossy inNatToSubtract =
+    Internal.sub inNatToSubtract
 
 
 {-| Subtract a fixed `Nat` value.
 
-    nat7 |> Nat.N.toIn
-        |> Nat.In.subN nat7
+    nat7 |> NNat.toIn
+        |> InNat.subN nat7
     --> is of type Nat (In Nat0 a)
+
+**Use [`MinNat.subN`](MinNat#subN) if the maximum value is `Infinity`**.
 
 -}
 subN :
     Nat (N subtracted (Is differenceMin To min) (Is differenceMax To max))
     -> Nat (In min max)
     -> Nat (In differenceMin differenceMax)
-subN subtractedNNat =
-    Internal.map (\x -> x - toInt subtractedNNat)
+subN nNatToSubtract =
+    Internal.sub nNatToSubtract
 
 
-{-| Divide (`//`) by a `Nat (Min ...)`. `div 0` is impossible.
+{-| Multiply by a `Nat (In ...)` >= 1.
+we know that if `a >= 1`, `x * a >= x`.
 
-    Nat.N.toIn nat7 |> Nat.In.div (nat3 |> Nat.N.toMin)
-    --> Nat 2 of type Nat (In Nat0 (Nat7Plus a))
+    nat5 |> NNat.toIn |> MinNat.mul (nat2 |> NNat.toIn)
+    --> Nat 10 of type Nat (Min Nat5)
+
+    nat2 |> NNat.toIn |> MinNat.mul (nat5 |> NNat.toIn)
+    --> Nat 10 of type Nat (Min Nat2)
+
+The maximum value of both factors can be `Infinity`.
+
+-}
+mul :
+    Nat (In (Nat1Plus multipliedMinMinus1) multipliedMax)
+    -> Nat (In min max)
+    -> Nat (Min min)
+mul minNatToMultiply =
+    Internal.map ((*) (toInt minNatToMultiply))
+
+
+{-| Divide (`//`) by a `Nat (In ...)`.
+
+  - `/ 0` is impossible
+
+  - `x / d` is at most x
+
+```
+nat7 |> NNat.toIn
+    |> InNat.div (nat3 |> NNat.dropMax)
+--> Nat 2 of type Nat (In Nat0 (Nat7Plus a))
+```
 
 -}
 div :
-    Nat (Min (Nat1Plus dMinMinus1))
+    Nat (In (Nat1Plus divMinMinus1) divMax)
     -> Nat (In min max)
     -> Nat (In Nat0 max)
 div minNat =
     Internal.map (\x -> x // toInt minNat)
 
 
-{-| The remainder after division. `remainderBy 0` is impossible.
+{-| The remainder after division.
 
-    Nat.N.toIn nat7 |> Nat.In.remainderBy (nat3 |> Nat.N.toMin)
-    --> Nat 1 of type Nat (In Nat0 (Nat7Plus a))
+  - `% 0` is impossible
+  - `x % d` is at most `x`
+
+```
+NNat.toIn nat7 |> InNat.remainderBy (nat3 |> NNat.dropMax)
+--> Nat 1 of type Nat (In Nat0 (Nat7Plus a))
+```
 
 -}
 remainderBy :
-    Nat (Min (Nat1Plus dMinMinus1))
+    Nat (In (Nat1Plus divMinMinus1) divMax)
     -> Nat (In min max)
     -> Nat (In Nat0 max)
 remainderBy minNat =
     Internal.map (Basics.remainderBy (minNat |> toInt))
 
 
+{-| The `Nat (Min ...) ^ a Nat (Min ...)`.
+We know that if `a >= 1  →  x ^ a >= x`
+
+    five |> MinNat.toPower two
+    --> Nat 25 of type Nat (Min Nat5)
+
+    two |> MinNat.toPower five
+    --> Nat 25 of type Nat (Min Nat2)
+
+    two = nat2 |> NNat.toIn
+
+    five = nat5 |> NNat.toIn
+
+The maximum of both the base and the power can be `Infinity`.
+
+-}
+toPower :
+    Nat (In (Nat1Plus powMinMinus1) powMax)
+    -> Nat (In min max)
+    -> Nat (Min min)
+toPower power =
+    Internal.map (\x -> x ^ toInt power)
+
+
 
 --## drop information
 
 
+{-| Convert an exact `Nat (In min ...)` to a `Nat (Min min)`.
+
+    in4To10 |> NNat.dropMax
+    --> is of type Nat (Min Nat4)
+
+There is **only 1 situation you should use this.**
+
+To make 2 `Nat`s the same type.
+
+    [ atLeast1, in1To10 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (In Nat1 Infinity)`
+
+    [ atLeast1
+    , in1To10 |> InNat.dropMax
+    ]
+
+-}
+dropMax : Nat (In min max) -> Nat (Min min)
+dropMax =
+    Internal.dropMax
+
+
 {-| Set the minimum lower.
 
-    [ Nat.N.toIn nat3, Nat.N.toIn nat4 ]
+    [ NNat.toIn nat3, NNat.toIn nat4 ]
 
 Elm complains:
 
 > But all the previous elements in the list are: `Nat (In Nat3 ...)`
 
-    [ Nat.N.toIn nat3
-    , Nat.N.toIn nat4 |> Nat.In.lowerMin (nat3 |> Nat.N.toIn)
+    [ NNat.toIn nat3
+    , NNat.toIn nat4 |> InNat.lowerMin (nat3 |> NNat.toIn)
     ]
 
 -}
@@ -494,9 +575,9 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
     onlyAtMost18 value =
         -- onlyAtMost19 value --error :(
         onlyAtMost19
-            (value |> Nat.In.maxIs nat18 {- works :) -})
+            (value |> InNat.maxIs nat18 {- works :) -})
 
-[`lowerMin`](Nat-In#lowerMin) is also handy in those situations.
+[`lowerMin`](InNat#lowerMin) is also handy in those situations.
 
 -}
 maxIs :
@@ -507,18 +588,6 @@ maxIs =
     \_ -> Internal.newRange
 
 
-{-| Convert a `Nat (In ...)` to a `Nat (Min ...)`.
-
-    squareAInNat =
-        Nat.In.dropMax
-            >> Nat.Min.toPower (nat2 |> Nat.N.toMin)
-
--}
-dropMax : Nat (In min max) -> Nat (Min min)
-dropMax =
-    Internal.newRange
-
-
 
 -- ## more
 
@@ -526,9 +595,15 @@ dropMax =
 {-| `Nat (In ...)`s from a first to a last value.
 
     from3To10 =
-        Nat.In.range (nat3 |> Nat.N.toIn) (nat10 |> Nat.N.toIn)
+        InNat.range (nat3 |> NNat.toIn) (nat10 |> NNat.toIn)
 
 The resulting `List` is never empty.
+
+Notice that the maximum value of the last can be Infinity.
+
+    InNat.range (nat3 |> NNat.toIn) (nat10 |> NNat.dropMax)
+    --> List (Nat (In Nat3 Infinity))
+    --> alias to List (Nat (Min Nat3))
 
 -}
 range :

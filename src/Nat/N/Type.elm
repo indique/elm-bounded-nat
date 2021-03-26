@@ -54,19 +54,19 @@ module Nat.N.Type exposing
     import Nat exposing (Nat)
     import Nat.Bound exposing (Only)
     import Nat.N.Type exposing (..)
-    import Nat.In
+    import InNat
 
   - Describe an exact value
 
         onlyExact1 : Nat (Only Nat1) -> Cake
 
-      - `takesOnlyExact1 (nat10 |> Nat.N.toIn)` is a compile-time error
+      - `takesOnlyExact1 (nat10 |> NNat.toIn)` is a compile-time error
 
   - Add a fixed value
 
         add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))
 
-      - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`
+      - `add2 (nat2 |> InNat)` is of type `Nat (Only Nat4)`
 
 
 ### about a big limitation

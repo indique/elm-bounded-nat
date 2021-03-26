@@ -1,4 +1,4 @@
-module Nat.N exposing
+module NNat exposing
     ( add1, sub1
     , toMin, toIn
     )
@@ -23,10 +23,24 @@ import Nat.Bound exposing (..)
 import Nat.N.Type exposing (..)
 
 
-{-| Convert an exact `Nat n` to a `Nat (Min n)`.
+{-| Convert an exact `Nat (N n ...)` to a `Nat (Min n)`.
 
-    nat4 |> Nat.N.toMin
+    nat4 |> NNat.toMin
     --> is of type Nat (Min Nat4)
+
+There is **only 1 situation you should use this.**
+
+To make 2 `Nat`s of the same type.
+
+    [ atLeast1, NNat.toIn nat1 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (In Nat1 Infinity)`
+
+    [ atLeast1
+    , NNat.toMin nat4
+    ]
 
 -}
 toMin : Nat (N n x y) -> Nat (Min n)
@@ -49,7 +63,7 @@ toIn =
 {-| The `Nat (N ...)` plus 1.
 
 Keep in mind that if you want add _any_ number,
-rather go for [`Nat (In ...)`](Nat-In) or [`Nat (Min ...)`](Nat-Min).
+rather go for [`Nat (In ...)`](InNat) or [`Nat (Min ...)`](MinNat).
 
 -}
 add1 :

@@ -4,14 +4,14 @@ module InNatTests exposing (suite)
 -}
 
 import Expect
+import InNat
+import MinNat
 import MinNatTests
+import NNat
+import NNats exposing (..)
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-import Nat.In
-import Nat.Min
-import Nat.N
 import Nat.N.Type exposing (..)
-import Nat.Ns exposing (..)
 import Test exposing (Test, describe, test)
 
 
@@ -21,7 +21,7 @@ suite =
         [ describe "recursive"
             [ test "ultraSafeFactorial"
                 (\() ->
-                    ultraSafeFactorial (nat4 |> Nat.N.toIn)
+                    ultraSafeFactorial (nat4 |> NNat.toIn)
                         |> Nat.toInt
                         |> Expect.equal 24
                 )
@@ -42,29 +42,29 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-natFactorial : Nat (Min Nat0) -> Nat (Min Nat1)
+natFactorial : Nat (In Nat0 max) -> Nat (Min Nat1)
 natFactorial =
-    Nat.Min.isAtLeast (nat1 |> Nat.N.toIn)
+    MinNat.isAtLeast (nat1 |> NNat.toIn)
         { min = nat0 }
-        { less = \_ -> Nat.N.toMin nat1
+        { less = \_ -> nat1 |> NNat.toMin
         , equalOrGreater =
-            \oneOrGreater ->
-                oneOrGreater
-                    |> Nat.Min.mul
+            \atLeast1 ->
+                atLeast1
+                    |> InNat.mul
                         (natFactorial
-                            (oneOrGreater |> Nat.Min.subN nat1)
+                            (atLeast1 |> MinNat.subN nat1)
                         )
         }
 
 
-factorial : Nat (Min min) -> Nat (Min Nat1)
+factorial : Nat (In min max) -> Nat (Min Nat1)
 factorial =
-    Nat.Min.lowerMin (nat0 |> Nat.N.toIn) >> natFactorial
+    InNat.lowerMin (nat0 |> NNat.toIn) >> natFactorial
 
 
 ultraSafeFactorial : Nat (In min Nat18) -> Nat (Min Nat1)
 ultraSafeFactorial =
-    Nat.In.dropMax >> MinNatTests.factorial
+    MinNatTests.factorial
 
 
 
@@ -73,30 +73,55 @@ ultraSafeFactorial =
 
 testAdd : Nat (In Nat4 (Nat22Plus a))
 testAdd =
-    Nat.In.intInRange (nat3 |> Nat.N.toIn) (nat10 |> Nat.N.toIn) 7
-        |> Nat.In.add (Nat.In.intInRange (nat1 |> Nat.N.toIn) (nat12 |> Nat.N.toIn) 9) nat1 nat12
+    Nat.intInRange (nat3 |> NNat.toIn) (nat10 |> NNat.toIn) 7
+        |> InNat.add (Nat.intInRange (nat1 |> NNat.toIn) (nat12 |> NNat.toIn) 9) nat1 nat12
 
 
 testAddN : Nat (In Nat15 (Nat19Plus a))
 testAddN =
-    Nat.In.intInRange (nat6 |> Nat.N.toIn) (nat10 |> Nat.N.toIn) 7
-        |> Nat.In.addN nat9
+    Nat.intInRange (nat6 |> NNat.toIn) (nat10 |> NNat.toIn) 7
+        |> InNat.addN nat9
 
 
 testSub : Nat (In Nat1 (Nat9Plus a))
 testSub =
-    Nat.In.intInRange (nat6 |> Nat.N.toIn) (nat10 |> Nat.N.toIn) 7
-        |> Nat.In.sub (Nat.In.intInRange (nat1 |> Nat.N.toIn) (nat5 |> Nat.N.toIn) 4) nat1 nat5
+    Nat.intInRange (nat6 |> NNat.toIn) (nat10 |> NNat.toIn) 7
+        |> InNat.sub (Nat.intInRange (nat1 |> NNat.toIn) (nat5 |> NNat.toIn) 4)
+            nat1
+            nat5
 
 
 testSubN : Nat (In Nat7 (Nat11Plus a))
 testSubN =
-    Nat.In.intInRange (nat16 |> Nat.N.toIn) (nat20 |> Nat.N.toIn) 17
-        |> Nat.In.subN nat9
+    Nat.intInRange (nat16 |> NNat.toIn) (nat20 |> NNat.toIn) 17
+        |> InNat.subN nat9
 
 
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a)))
 testLowerMin =
-    [ Nat.N.toIn nat3
-    , Nat.N.toIn nat4 |> Nat.In.lowerMin (nat3 |> Nat.N.toIn)
+    [ NNat.toIn nat3
+    , NNat.toIn nat4 |> InNat.lowerMin (nat3 |> NNat.toIn)
     ]
+
+
+rgbPer100 :
+    Nat (In redMin Nat100)
+    -> Nat (In greenMin Nat100)
+    -> Nat (In blueMin Nat100)
+    -> ()
+rgbPer100 _ _ _ =
+    ()
+
+
+grey : Float -> ()
+grey float =
+    let
+        greyLevel =
+            float
+                * 100
+                |> round
+                |> Nat.intInRange
+                    (nat0 |> NNat.toIn)
+                    (nat100 |> NNat.toIn)
+    in
+    rgbPer100 greyLevel greyLevel greyLevel

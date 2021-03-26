@@ -1,6 +1,6 @@
 module Nat.Bound exposing
-    ( Min
-    , In
+    ( In
+    , Min, Infinity
     , Only
     , N, Is, To
     )
@@ -8,17 +8,17 @@ module Nat.Bound exposing
 {-|
 
 
-## Min
-
-@docs Min
-
-
 ## In
 
 @docs In
 
 
-## Only
+### Min
+
+@docs Min, Infinity
+
+
+### Only
 
 @docs Only
 
@@ -30,22 +30,30 @@ module Nat.Bound exposing
 -}
 
 
-{-| `Min minimum`: At least `minimum`.
+{-| Sometimes, you simply cannot compute a maximum.
 
-       ↓ minimum
-    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
+    abs : Int -> Nat (In Nat0 ??)
 
-Any natural number:
+We just say the maximum value is `Infinity` and we're done.
 
-    Nat (Min Nat0)
+    abs : Int -> Nat (In Nat0 Infinity)
 
-A number, at least 5:
+A short form is [`Min`](Nat-Bound#Min)
 
-    Nat (Min Nat5)
+    abs : Int -> Nat (Min Nat0)
+
+Note: if you want an argument to just be at least a minimum value, do
+
+    --incomplete
+    divideBy : Nat (In (Nat1Plus minMinus1) max)
+
+So that way, both `In Nat7 Nat123` & `In Nat7 Infinity`/`Min Nat7` fit.
+
+Only **return types should contain `Infinity`**, whereas **prarameters should never contain `Infinity`.**
 
 -}
-type Min minimum
-    = Min Never
+type Infinity
+    = Infinity Never
 
 
 {-| `In minimum maximum`: Somewhere within a minimum & maximum.
@@ -59,9 +67,50 @@ Note: maximum >= minimum for every existing `Nat (In ...)`:
 
 → `minimum <= Nat100`
 
+If you want a number where you just care about the minimum, go
+
+       ↓ minimum    ↓ maximum or  →
+    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
+
+Any natural number:
+
+    Nat (In Nat0 max)
+
+A number, at least 5:
+
+    Nat (Min Nat5 max)
+
+`max` can then either be a value or [`Infinity`](Nat-Bound#Infinity).
+
 -}
 type In minimum maximum
     = In Never
+
+
+{-| Sometimes, you simply cannot compute a maximum.
+
+    abs : Int -> Nat (In Nat0 ??)
+
+We just say the maximum value is [`Infinity`](Nat-Bound#Infinity) and we're done.
+
+    abs : Int -> Nat (In Nat0 Infinity)
+
+`Min` is just a shorthand.
+
+    abs : Int -> Nat (Min Nat0)
+
+Note: if you want an argument to just be at least a minimum value, do
+
+    --incomplete
+    divideBy : Nat (In (Nat1Plus minMinus1) max)
+
+So that way, both `In Nat7 Nat123` & `In Nat7 Infinity`/`Min Nat7` fit.
+
+Only **return types should be `Min`**, whereas **prarameters should never be `Min`.**
+
+-}
+type alias Min minimum =
+    In minimum Infinity
 
 
 {-| Just the exact number.
@@ -72,14 +121,7 @@ Only useful in function annotations.
 
 → A given [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/) must have _exact 8_ `Bit`s.
 
-    repeat : Nat (Only n) -> element -> Arr (Only n)
-
-    repeat (Nat.N.toIn nat6) "ok"
-    --> Arr (Only Nat6)
-
-→ repeating an `element` `n` times will give you a Arr of `n` elements.
-
-→ Every `In NatXYZ (NatXYZPlus a)` is also a `Only NatXYZ`, _but not the other way around_
+Every `In NatXYZ (NatXYZPlus a)` is also a `Only NatXYZ`, _but not the other way around_
 
 -}
 type alias Only n =
@@ -122,14 +164,14 @@ Looking at the type
                 (Is b To b)
             )
 
-An example is [`Nat.In.addN`](Nat-In#addN)
+An example is [`InNat.addN`](InNat#addN)
 
     addN :
         Nat (N added (Is min To sumMin) (Is max To sumMax))
         -> Nat (In min max)
         -> Nat (In sumMin sumMax)
 
-You can just ignore the second difference if you don't need it ([`Nat.Min.addN`](Nat-Min#addN)).
+You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
 
     addN :
         Nat (N added (Is min To sumMin) x)

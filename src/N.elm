@@ -1,6 +1,6 @@
 module N exposing (S, Z)
 
-{-| For performance reasons, supplying the module [`Nat.N.Type`](Nat-N#Type) from here to make names shorter.
+{-| For performance reasons, supplying the module [`Nat.N.Type`](NNat#Type) from here to make names shorter.
 -}
 
 

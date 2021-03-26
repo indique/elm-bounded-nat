@@ -1,8 +1,8 @@
 module GenerateForElmBoundedNat exposing (main)
 
 {-| Helps you generate the source code of the modules
-- [`Nat.N`](Nat-N)
-- [`Nat.N.Type`](Nat-N-Type)
+- [`NNat`](NNat)
+- [`Nat.N.Type`](NNat-Type)
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 -}
@@ -283,7 +283,7 @@ natNsModule =
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
-                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`Nat.N`](Nat#N) for an explanation."
+                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NatNsValue declarations
                     ]
             }
@@ -352,10 +352,10 @@ natNTypeModule =
                     [ markdown "Express exact numbers in the type."
                     , markdown "- Describe an exact value"
                     , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
-                    , markdown "    - `takesOnlyExact1 (nat10 |> Nat.N.toIn)` is a compile-time error"
+                    , markdown "    - `takesOnlyExact1 (nat10 |> NNat.toIn)` is a compile-time error"
                     , markdown "- Add a fixed value"
                     , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
-                    , markdown "    - `add2 (nat2 |> Nat.In)` is of type `Nat (Only Nat4)`"
+                    , markdown "    - `add2 (nat2 |> InNat)` is of type `Nat (Only Nat4)`"
                     , markdown "### about a big limitation"
                     , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
                     , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) Is difference)"
@@ -473,7 +473,7 @@ view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
             ]
             [ Ui.el
                 [ UiFont.size 40
-                , UiFont.family [ UiFont.typeface "Fira Code" ]
+                , UiFont.family [ UiFont.monospace ]
                 ]
                 (Ui.text "elm-bounded-nat modules")
             , UiInput.button
@@ -503,7 +503,7 @@ view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
                                         { onPress = Just switch
                                         , label =
                                             Ui.el
-                                                [ UiFont.family [ UiFont.typeface "Fira Code" ] ]
+                                                [ UiFont.family [ UiFont.monospace ] ]
                                                 (Ui.text text)
                                         }
                                     )
@@ -529,7 +529,7 @@ view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
                                         switchButton ("⌄ " ++ name) switch
                         in
                         [ ( natNsModuleShownOrFolded
-                          , ( "Nat.Ns", NatNs )
+                          , ( "NNats", NatNs )
                           )
                         , ( natNTypeModuleShownOrFolded
                           , ( "Nat.N.Type", NatNType )

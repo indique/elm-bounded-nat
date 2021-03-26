@@ -6,10 +6,10 @@
     "version": "8.0.2",
     "exposed-modules": [
         "Nat",
-        "Nat.N",
-        "Nat.Ns",
-        "Nat.Min",
-        "Nat.In",
+        "NNat",
+        "NNats",
+        "MinNat",
+        "InNat",
         "Nat.N.Type",
         "Nat.Bound"
     ],
