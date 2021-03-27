@@ -37,20 +37,22 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-factorialHelp : Nat (In Nat0 max) -> Nat (Min Nat1)
+factorialHelp : Nat (In Nat0 mx) -> Nat (Min Nat1)
 factorialHelp =
     MinNat.isAtLeast (nat1 |> NNat.toIn)
         { min = nat0 }
         { less = \_ -> nat1 |> NNat.toMin
         , equalOrGreater =
             \atLeast1 ->
-                InNat.mul
-                    (factorialHelp (atLeast1 |> MinNat.subN nat1))
-                    atLeast1
+                atLeast1
+                    |> InNat.mul
+                        (factorial
+                            (atLeast1 |> MinNat.subN nat1)
+                        )
         }
 
 
-factorial : Nat (In min max) -> Nat (Min Nat1)
+factorial : Nat (In min mx) -> Nat (Min Nat1)
 factorial =
     InNat.lowerMin (nat0 |> NNat.toIn) >> factorialHelp
 

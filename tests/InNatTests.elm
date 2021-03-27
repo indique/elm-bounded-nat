@@ -17,7 +17,7 @@ import Test exposing (Test, describe, test)
 
 suite : Test
 suite =
-    describe "bounded-nat"
+    describe "InNat"
         [ describe "recursive"
             [ test "ultraSafeFactorial"
                 (\() ->
