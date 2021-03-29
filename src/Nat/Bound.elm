@@ -67,7 +67,7 @@ Note: maximum >= minimum for every existing `Nat (In ...)`:
 
 → `minimum <= Nat100`
 
-If you want a number where you just care about the minimum, go
+If you want a number where you just care about the minimum, leave the `max` as a type _variable_.
 
        ↓ minimum    ↓ maximum or  →
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
@@ -78,7 +78,7 @@ Any natural number:
 
 A number, at least 5:
 
-    Nat (Min Nat5 max)
+    Nat (In Nat5 max)
 
 `max` can then either be a value or [`Infinity`](Nat-Bound#Infinity).
 
