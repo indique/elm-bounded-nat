@@ -11,3 +11,11 @@ Made `Min min` alias to type `In min Infinity`.
 - removed functions that apply for any `max` in `MinNat`
 - moved functions that just result in a `Nat (Min ...)` into `InNat`
 - moved `abs` & `isInt...` & `int...` into `Nat`
+
+### 9.1.0
+
+- added `sub` & `add` in `NNat`.
+
+#### 9.1.1
+
+- minor doc fix for `Nat.Bound.In`
