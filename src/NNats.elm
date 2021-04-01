@@ -9,7 +9,7 @@ module NNats exposing
     , nat162, nat163, nat164, nat165, nat166, nat167, nat168, nat169, nat17, nat170
     , nat171, nat172, nat173, nat174, nat175, nat176, nat177, nat178, nat179, nat18
     , nat180, nat181, nat182, nat183, nat184, nat185, nat186, nat187, nat188, nat189
-    , nat19, nat190, nat191, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26
+    , nat19, nat190, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26
     , nat27, nat28, nat29, nat3, nat30, nat31, nat32, nat33, nat34, nat35, nat36, nat37, nat38
     , nat39, nat4, nat40, nat41, nat42, nat43, nat44, nat45, nat46, nat47, nat48, nat49, nat5
     , nat50, nat51, nat52, nat53, nat54, nat55, nat56, nat57, nat58, nat59, nat6, nat60, nat61
@@ -33,7 +33,7 @@ See [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation.
 @docs nat162, nat163, nat164, nat165, nat166, nat167, nat168, nat169, nat17, nat170
 @docs nat171, nat172, nat173, nat174, nat175, nat176, nat177, nat178, nat179, nat18
 @docs nat180, nat181, nat182, nat183, nat184, nat185, nat186, nat187, nat188, nat189
-@docs nat19, nat190, nat191, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26
+@docs nat19, nat190, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26
 @docs nat27, nat28, nat29, nat3, nat30, nat31, nat32, nat33, nat34, nat35, nat36, nat37, nat38
 @docs nat39, nat4, nat40, nat41, nat42, nat43, nat44, nat45, nat46, nat47, nat48, nat49, nat5
 @docs nat50, nat51, nat52, nat53, nat54, nat55, nat56, nat57, nat58, nat59, nat6, nat60, nat61
@@ -1385,10 +1385,3 @@ nat189 =
 nat190 : Nat (N Nat190 (Nat190Plus more) (Is a To (Nat190Plus a)) (Is b To (Nat190Plus b)))
 nat190 =
     nat189 |> add1
-
-
-{-| The `Nat` 191.
--}
-nat191 : Nat (N Nat191 (Nat191Plus more) (Is a To (Nat191Plus a)) (Is b To (Nat191Plus b)))
-nat191 =
-    nat190 |> add1

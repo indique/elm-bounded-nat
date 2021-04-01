@@ -35,4 +35,4 @@ Made `Min min` alias to type `In min Infinity`.
 - moved operations like `mul`, where the `max` is ignored into `MinNat`
 - renamed `dropMax` to `toMin`
 - removed `NNat.toMin`, as `dropMax` works the same
-- removed `NNats.nat192`
+- removed `NNats.nat192` & `NNats.nat191`
