@@ -1,24 +1,12 @@
 ## elm-bounded-nat
 
-The goal of this library is to supply you with more type-safe natural numbers (`>= 0`).
-Its types ensure that a `Nat` is in a range _at compile-time_:
+Type-safe natural numbers (`>= 0`), ensuring that a `Nat` is in a range _at compile-time_:
 
 ```elm
 toHexChar : Nat (In min Nat15 maybeN) -> Char
 ```
 
 **No number below 0 or above 15** can be passed in as an argument!
-
-`In` only allows values that are
-- at least a _minimum_ value: `⨯[✓✓✓✓✓✓✓...`
-- you might also restrict it to be at most a _maximum_ value: `⨯⨯[✓✓✓]⨯⨯...`
-
-The type of a value reflects how much you know.
-
-- `N`: exact value: `⨯✓⨯⨯⨯⨯...`
-    - (also describes the difference between 2 values)
-- `ValueIn`: between a minimum & maximum value
-- `ValueMin`: at least a minimum value
 
 Setup
 
@@ -34,16 +22,16 @@ import InNat
 import MinNat
 ```
 
-## examples
 
-
-### color
+## example: color
 
 ```elm
 rgb : Float -> Float -> Float -> Color
 ```
 
-This is common, but _the one implementing_ the function has to handle the case where a value is not between 0 and 1.
+This is common, but
+- _the one implementing_ the function has to handle the case where a value is not between 0 and 1
+- the _type_ doesn't tell us that only a `Float` between 0 & 1 is needed
 
 ```elm
 rgbPer100 :
@@ -52,7 +40,19 @@ rgbPer100 :
     -> Nat (In blueMin Nat100 blueMaybeN)
     -> Color
 ```
-Here, _the one using_ this function must make sure to you that the numbers are actually between 0 and 100.
+- _the one using_ this function must make sure to you that the numbers are actually between 0 and 100
+- you clearly know what input is desired
+
+The type
+```elm
+Nat (In min Nat100 maybeN)
+```
+is saying it wants:
+- an integer >= 0                    → `Nat ...`
+    - which is in a range               → `In ...`
+        - which can have any minimum value → `min`
+        - which is at most 100             → `Nat100`
+        - which might be exact             → `maybeN`
 
 They can prove it by
 
@@ -93,7 +93,7 @@ grey float =
 &emsp;
 
 
-### digit
+## example: digit
 
 ```elm
 toDigit : Char -> Maybe Int
@@ -111,10 +111,18 @@ type alias Digit =
     Nat (ValueIn Nat0 Nat9)
 ```
 
+The type of a value reflects how much you know.
+
+- `ValueIn`: between a minimum & maximum value
+- `ValueMin`: at least a minimum value
+- `N`: exact value
+    - (also describes the difference between 2 values)
+
+
 &emsp;
 
 
-### factorial
+## example: factorial
 
 ```elm
 intFactorial : Int -> Int
@@ -182,12 +190,11 @@ No extra work.
 - keep _as much type information as possible_ and drop it only where you need to.
 ```elm
 squares2To10 =
-    -- Nats from 2 to 10
     -- every Nat is In Nat2 Nat10
     InNat.range nat2 nat10
         |> List.map
             (InNat.toPower nat2
-            -- we can't compute the exact minimum
+            -- we can't compute the exact minimum & maximum
             -- but we know its at least Nat2
             )
 ```
@@ -195,11 +202,11 @@ squares2To10 =
     
     Instead of accepting only values where you know the values exact
 ```elm
-rgb : Nat (N red (Is inverseRed To Nat100) x) -> --...
+rgb : Nat (N red atLeastRed (Is inverseRed To Nat100) y) -> --...
 ```
     accept values that are somewhere in a range.
 ```elm
-rgb : Nat (In redMin Nat100) -> --...
+rgb : Nat (In redMin Nat100 maybeN) -> --...
 ```
     or instead of
 ```elm
@@ -212,6 +219,8 @@ charFromCode : Nat (In min max maybeN) -> Char
 
 Take a look at [`elm-bounded-array`][bounded-array] to see a lot of this in action!
 
-You get to know that a `Nat (In ...)` is very useful as an index!
+You get to know that
+- a `Nat (In ...)` is very useful as an index
+- a `Nat.Bound` can describe amounts well
 
 [bounded-array]: https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/
