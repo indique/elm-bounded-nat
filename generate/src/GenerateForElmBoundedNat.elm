@@ -2,7 +2,7 @@ module GenerateForElmBoundedNat exposing (main)
 
 {-| Helps you generate the source code of the modules
 - [`NNat`](NNat)
-- [`Nat.N.Type`](NNat-Type)
+- [`TypeNats`](NNat-Type)
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 -}
@@ -99,7 +99,7 @@ main =
 
 
 type alias Model =
-    { natNsModuleShownOrFolded :
+    { nNatsModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
     , natNTypeModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
@@ -114,8 +114,8 @@ type ShownOrFolded content
 
 --tags
 
-type NatNsTag =
-    NatNsValue
+type NNatsTag =
+    NNatsValue
 
 type NatNTypeTag
     = NatNTypeExact
@@ -126,7 +126,7 @@ type NatNTypeTag
 
 init : ( Model, Cmd Msg )
 init =
-    ( { natNsModuleShownOrFolded = Folded
+    ( { nNatsModuleShownOrFolded = Folded
       , natNTypeModuleShownOrFolded = Folded
       }
     , Cmd.none
@@ -140,7 +140,7 @@ type Msg
 
 
 type ModulesInElmNArrays
-    = NatNs
+    = NNats
     | NatNType
 
 
@@ -170,7 +170,7 @@ update msg model =
                         zipEntryFromModule time moduleFile
                  in
                  Zip.fromEntries
-                    [ toZipEntry natNsModule
+                    [ toZipEntry nNatsModule
                     , toZipEntry natNTypeModule
                     ]
                     |> Zip.toBytes
@@ -179,12 +179,12 @@ update msg model =
 
         SwitchVisibleModule moduleKind ->
             ( case moduleKind of
-                NatNs ->
+                NNats ->
                     { model
-                        | natNsModuleShownOrFolded =
+                        | nNatsModuleShownOrFolded =
                             switchShownOrFolded
-                                (.natNsModuleShownOrFolded model)
-                                viewNatNsModule
+                                (.nNatsModuleShownOrFolded model)
+                                viewNNatsModule
                     }
                 NatNType ->
                     { model
@@ -224,9 +224,11 @@ nAnn :
     -> Elm.CodeGen.TypeAnnotation
     -> Elm.CodeGen.TypeAnnotation
     -> Elm.CodeGen.TypeAnnotation
-nAnn a difference otherDifference =
+    -> Elm.CodeGen.TypeAnnotation
+nAnn a atLeastA difference otherDifference =
     typed "N"
         [ a
+        , atLeastA
         , difference
         , otherDifference
         ]
@@ -257,6 +259,7 @@ zeroAnn =
     natNAnn
         (nAnn
             (typed "Nat0" [])
+            (typeVar "atLeast0")
             (isAnn "a" identity)
             (isAnn "b" identity)
         )
@@ -270,21 +273,21 @@ lastN : Int
 lastN =
     192
 
-viewNatNsModule : Ui.Element msg
-viewNatNsModule =
-    Ui.module_ natNsModule
+viewNNatsModule : Ui.Element msg
+viewNNatsModule =
+    Ui.module_ nNatsModule
 
 
-natNsModule : Module NatNsTag
-natNsModule =
-    { name = [ "Nat", "Ns" ]
+nNatsModule : Module NNatsTag
+nNatsModule =
+    { name = [ "NNats" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
                 \declarations->
                     [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
                     , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation."
-                    , docTagsFrom NatNsValue declarations
+                    , docTagsFrom NNatsValue declarations
                     ]
             }
     , imports =
@@ -305,7 +308,7 @@ natNsModule =
             natComment x =
                 [ markdown ("The `Nat` " ++ String.fromInt x ++ ".") ]
         in
-        [ [ packageExposedFunDecl NatNsValue
+        [ [ packageExposedFunDecl NNatsValue
                 (natComment 0)
                 zeroAnn
                 "nat0"
@@ -315,11 +318,12 @@ natNsModule =
         , List.range 1 lastN
             |> List.map
                 (\x ->
-                    packageExposedFunDecl NatNsValue
+                    packageExposedFunDecl NNatsValue
                         (natComment x)
                         (natNAnn
                             (nAnn
                                 (typed ("Nat" ++ String.fromInt x) [])
+                                (natXPlusAnn x (typeVar "more"))
                                 (isAnn "a" (natXPlusAnn x))
                                 (isAnn "b" (natXPlusAnn x))
                             )
@@ -344,7 +348,7 @@ viewNatNTypeModule =
 
 natNTypeModule : Module NatNTypeTag
 natNTypeModule =
-    { name = [ "N", "Nat", "Type" ]
+    { name = [ "TypeNats" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
@@ -352,7 +356,7 @@ natNTypeModule =
                     [ markdown "Express exact numbers in the type."
                     , markdown "- Describe an exact value"
                     , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
-                    , markdown "    - `takesOnlyExact1 (nat10 |> NNat.toIn)` is a compile-time error"
+                    , markdown "    - `takesOnlyExact1 nat10` is a compile-time error"
                     , markdown "- Add a fixed value"
                     , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
                     , markdown "    - `add2 (nat2 |> InNat)` is of type `Nat (Only Nat4)`"
@@ -394,8 +398,8 @@ natNTypeModule =
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "more" ]
-                        (typed ("Nat" ++ String.fromInt (n - 1) ++ "Plus")
-                            [ typed "S" [ typeVar "more" ] ]
+                        (natXPlusAnn (n - 1)
+                            (typed "S" [ typeVar "more" ])
                         )
                 )
         , [ packageExposedAliasDecl NatNTypeExact
@@ -413,9 +417,7 @@ natNTypeModule =
                         ]
                         ("Nat" ++ String.fromInt n)
                         []
-                        (typed ("Nat" ++ String.fromInt n ++ "Plus")
-                            [ typed "Z" [] ]
-                        )
+                        (natXPlusAnn n (typed "Z" []))
                 )
         ]
             |> List.concat
@@ -452,7 +454,7 @@ charPrefixed use last =
 
 
 view : Model -> Html Msg
-view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
+view { nNatsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
     Ui.layoutWith
         { options =
             [ Ui.focusStyle
@@ -528,11 +530,11 @@ view { natNsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
                                     Folded ->
                                         switchButton ("⌄ " ++ name) switch
                         in
-                        [ ( natNsModuleShownOrFolded
-                          , ( "NNats", NatNs )
+                        [ ( nNatsModuleShownOrFolded
+                          , ( "NNats", NNats )
                           )
                         , ( natNTypeModuleShownOrFolded
-                          , ( "Nat.N.Type", NatNType )
+                          , ( "TypeNats", NatNType )
                           )
                         ]
                             |> List.map

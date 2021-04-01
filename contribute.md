@@ -10,7 +10,7 @@
 - share your thoughts
 - add operations that might be useful
     - e.g. more lossy operations
-    - note: `NNats` & `Nat.N.Type` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
+    - note: `NNats` & `TypeNats` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
 
 ### Summary Guide
 
