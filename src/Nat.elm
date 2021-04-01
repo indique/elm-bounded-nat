@@ -1,6 +1,6 @@
 module Nat exposing
     ( Nat
-    , abs
+    , abs, range, random
     , toInt, bi
     , theGreater, theSmaller
     , isIntInRange, isIntAtLeast
@@ -12,9 +12,9 @@ module Nat exposing
 @docs Nat
 
 
-## from `Int`
+## create
 
-@docs abs
+@docs abs, range, random
 
 
 ## transform
@@ -35,25 +35,35 @@ module Nat exposing
 -}
 
 import Internal
-import Nat.Bound exposing (In, Min)
-import Nat.N.Type exposing (..)
+import Nat.Bound exposing (In, ValueIn, ValueMin)
+import Random
+import TypeNats exposing (..)
 
 
 {-| A **bounded** natural number (`>= 0`).
 
+
+## value / return types
+
     -- >= 4
-    Nat (Min Nat4)
+    Nat (ValueMin Nat4)
 
     -- 2 <= nat <= 12
-    Nat (In Nat2 Nat12)
-
-    -- = 3
-    Nat (Only Nat3)
+    Nat (ValueIn Nat2 Nat12)
 
     -- = 3, & 3, described as a difference
-    Nat (N Nat3 Is (Difference a To (Nat3Plus a)))
+    Nat (N Nat3 (Nat3Plus more) (Is a To (Nat3Plus a)) (Is b To (Nat3Plus b)))
 
-    -- either one of the above
+
+## function argument types
+
+    -- >= 4
+    Nat (In (Nat4Plus minMinus4) max maybeN)
+
+    -- 4 <= nat <= 5
+    Nat (In (Nat4Plus minMinus4) Nat15 maybeN)
+
+    -- any, just >= 0
     Nat range
 
     -- Not constuctable
@@ -62,6 +72,66 @@ import Nat.N.Type exposing (..)
 -}
 type alias Nat range =
     Internal.Nat range
+
+
+{-| The absolute value of an `Int`, which is at least `Nat0`.
+
+    MinNat.abs 16 --> Nat 16
+
+    MinNat.abs -4 --> Nat 4
+
+Really only use this if you want the absolute value.
+
+    badLength list =
+        List.length >> MinNat.abs
+
+    goodLength =
+        List.foldl
+            (\_ ->
+                MinNat.addN nat1
+                    >> InNat.lowerMin nat0
+            )
+            (nat0 |> NNat.toMin)
+
+If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLeast)!
+
+-}
+abs : Int -> Nat (ValueMin Nat0)
+abs int =
+    Basics.abs int |> Internal.Nat
+
+
+{-| `Nat (In ...)`s from a first to a last value.
+
+    from3To10 : List (Nat (ValueIn Nat3 (Nat10Plus a)))
+    from3To10 =
+        InNat.range nat3 nat10
+
+    from3ToAtLeast10 : List (Nat (ValueMin Nat3))
+    from3ToAtLeast10 =
+        InNat.range nat3 atLeast10
+
+The resulting `List` is never empty.
+
+-}
+range :
+    Nat (In firstMin lastMin firstMaybeN)
+    -> Nat (In lastMin lastMax lastMaybeN)
+    -> List (Nat (ValueIn firstMin lastMax))
+range first last =
+    bi List.range first last
+        |> List.map Internal.Nat
+
+
+{-| Generate a random `Nat (In ...)` in a range.
+-}
+random :
+    Nat (In firstMin lastMin firstMaybeN)
+    -> Nat (In lastMin lastMax lastMaybeN)
+    -> Random.Generator (Nat (ValueIn firstMin lastMax))
+random min max =
+    bi Random.int min max
+        |> Random.map Internal.Nat
 
 
 {-| Convert a `Nat` to an `Int`.
@@ -80,38 +150,10 @@ toInt =
     Internal.toInt
 
 
-{-| The absolute value of an `Int`, which is at least `Nat0`.
-
-    MinNat.abs 16 --> Nat 16
-
-    MinNat.abs -4 --> Nat 4
-
-Really only use this if you want the absolute value.
-
-    badLength list =
-        List.length >> MinNat.abs
-
-    goodLength =
-        List.foldl
-            (\_ ->
-                MinNat.addN nat1
-                    >> InNat.lowerMin (nat0 |> NNat.toIn)
-            )
-            (nat0 |> NNat.toMin)
-
-If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLeast)!
-
--}
-abs : Int -> Nat (Min Nat0)
-abs int =
-    Basics.abs int |> Internal.Nat
-
-
 {-| The greater of 2 `Nat`s. Works just like `Basics.max`.
 
-    Nat.theGreater
-        (nat3 |> NNat.toMin)
-        (nat4 |> NNat.toMin |> MinNat.lowerMin (nat3 |> NNat.toIn))
+    Nat.theGreater atLeast3
+        (atLeast4 |> InNat.lowerMin nat3)
     --> Nat 4
 
 -}
@@ -126,9 +168,8 @@ theGreater a b =
 
 {-| The smaller of 2 `Nat`s. Works just like `Basics.min`.
 
-    Nat.theSmaller
-        (nat3 |> NNat.toMin)
-        (nat4 |> NNat.toMin |> MinNat.lowerMin (nat3 |> NNat.toIn))
+    Nat.theSmaller atLeast3
+        (atLeast4 |> InNat.lowerMin nat3)
     --> Nat 3
 
 -}
@@ -144,7 +185,7 @@ theSmaller a b =
 {-| An `Int` compared to a range from `first` to `last`.
 
     rejectOrAcceptUserInt =
-        isIntInRange (nat1 |> NNat.toIn) (nat100 |> NNat.toIn)
+        isIntInRange nat1 nat100
             { less = Err "must be >= 1"
             , greater = \_-> Err "must be <= 100"
             , inRange = Ok
@@ -155,13 +196,13 @@ theSmaller a b =
 
 -}
 isIntInRange :
-    { first : Nat (In minFirst last)
-    , last : Nat (In last lastPlusA)
+    { first : Nat (In minFirst last firstMaybeN)
+    , last : Nat (In last lastPlusA lastMaybeN)
     }
     ->
         { less : () -> result
-        , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (In minFirst lastPlusA) -> result
+        , greater : Nat (ValueMin (Nat1Plus last)) -> result
+        , inRange : Nat (ValueIn minFirst lastPlusA) -> result
         }
     -> Int
     -> result
@@ -176,7 +217,7 @@ isIntInRange interval cases int =
 
 ```
 clampBetween3And12 =
-    Nat.intInRange (nat3 |> NNat.toIn) (nat12 |> NNat.toIn)
+    Nat.intInRange nat3 nat12
 
 9 |> clampBetween3And12 --> Nat 9
 
@@ -189,22 +230,25 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIn
 
 -}
 intInRange :
-    Nat (In min firstMax)
-    -> Nat (In firstMax max)
+    Nat (In min firstMax maybeN)
+    -> Nat (In firstMax max upperMaybeN)
     -> Int
-    -> Nat (In min max)
+    -> Nat (ValueIn min max)
 intInRange lowerLimit upperLimit =
     Internal.intInRange lowerLimit upperLimit
 
 
 {-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
 
-    4 |> Nat.isIntAtLeast (nat5 |> NNat.toIn) --> Nothing
+    4 |> Nat.isIntAtLeast nat5 --> Nothing
 
-    1234 |> Nat.isIntAtLeast (nat5 |> NNat.toIn) --> Just (Nat 1234)
+    1234 |> Nat.isIntAtLeast nat5 --> Just (Nat 1234)
 
 -}
-isIntAtLeast : Nat (In min max) -> Int -> Maybe (Nat (Min min))
+isIntAtLeast :
+    Nat (In min max maybeN)
+    -> Int
+    -> Maybe (Nat (ValueMin min))
 isIntAtLeast minimum int =
     if int >= toInt minimum then
         Just (Internal.Nat int)
@@ -229,17 +273,20 @@ But avoid it if you can do better, like
         List.foldl
             (\_ ->
                 MinNat.addN nat1
-                    >> InNat.lowerMin (nat0 |> NNat.toIn)
+                    >> InNat.lowerMin nat0
             )
-            (nat0 |> NNat.toMin)
+            (nat0 |> InNat.toMin)
 
 If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Nat#isIntAtLeast).
 
 -}
-intAtLeast : Nat (In min max) -> Int -> Nat (Min min)
+intAtLeast :
+    Nat (In min max maybeN)
+    -> Int
+    -> Nat (ValueMin min)
 intAtLeast minimum =
     isIntAtLeast minimum
-        >> Maybe.withDefault (Internal.dropMax minimum)
+        >> Maybe.withDefault (Internal.toMin minimum)
 
 
 {-| Use the `Int` values of two `Nat`s to return a result.

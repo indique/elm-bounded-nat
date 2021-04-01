@@ -2,8 +2,8 @@ module Internal exposing
     ( add, sub
     , isIntInRange, isIntAtLeast
     , intInRange
-    , dropMax
-    , Nat(..), add1, map, newRange, sub1, toInt
+    , toIn, toMin
+    , Nat(..), add1, map, newRange, toInt
     )
 
 {-|
@@ -26,12 +26,12 @@ module Internal exposing
 
 ## drop information
 
-@docs dropMax
+@docs toIn, toMin
 
 -}
 
-import Nat.Bound exposing (In, Is, Min, N, To)
-import Nat.N.Type exposing (..)
+import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
+import TypeNats exposing (..)
 
 
 type Nat range
@@ -53,17 +53,23 @@ newRange =
     toInt >> Nat
 
 
-dropMax : Nat (In min max) -> Nat (Min min)
-dropMax =
+toMin : Nat (In min max maybeN) -> Nat (ValueMin min)
+toMin =
+    newRange
+
+
+toIn : Nat (In min max maybeN) -> Nat (ValueIn min max)
+toIn =
     newRange
 
 
 add1 :
-    Nat (N n (Is a To nPlusA) (Is b To nPlusB))
+    Nat (N n atLeastN (Is a To nPlusA) (Is b To nPlusB))
     ->
         Nat
             (N
                 (Nat1Plus n)
+                (Nat1Plus atLeastN)
                 (Is a To (Nat1Plus nPlusA))
                 (Is b To (Nat1Plus nPlusB))
             )
@@ -71,30 +77,18 @@ add1 =
     map ((+) 1)
 
 
-sub1 :
-    Nat
-        (N
-            (Nat1Plus nMinus1)
-            (Is a To (Nat1Plus nMinus1PlusA))
-            (Is b To (Nat1Plus nMinus1PlusB))
-        )
-    -> Nat (N nMinus1 (Is a To nMinus1PlusA) (Is b To nMinus1PlusB))
-sub1 =
-    map (\x -> x - 1)
-
-
 
 -- ## compare
 
 
 isIntInRange :
-    { first : Nat (In minFirst last)
-    , last : Nat (In last lastPlusA)
+    { first : Nat (In minFirst last firstMaybeN)
+    , last : Nat (In last maxLast lastMaybeN)
     }
     ->
         { less : () -> result
-        , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (In minFirst lastPlusA) -> result
+        , greater : Nat (ValueMin (Nat1Plus last)) -> result
+        , inRange : Nat (ValueIn minFirst maxLast) -> result
         }
     -> Int
     -> result
@@ -116,7 +110,7 @@ isIntInRange interval cases int =
 
 ```
 clampBetween3And12 =
-    Nat.intInRange (nat3 |> NNat.toIn) (nat12 |> NNat.toIn)
+    Nat.intInRange nat3 nat12
 
 9 |> clampBetween3And12 --> Nat 9
 
@@ -129,24 +123,27 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIn
 
 -}
 intInRange :
-    Nat (In min firstMax)
-    -> Nat (In firstMax max)
+    Nat (In min firstMax lowerMaybeN)
+    -> Nat (In firstMax max upperMaybeN)
     -> Int
-    -> Nat (In min max)
+    -> Nat (ValueIn min max)
 intInRange lowerLimit upperLimit =
     Basics.min (upperLimit |> toInt)
         >> Basics.max (lowerLimit |> toInt)
         >> Nat
 
 
-{-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
+{-| If the `Int >= a minimum`, `Just` the `Nat (ValueMin minimum)`, else `Nothing`.
 
-    4 |> Nat.isIntAtLeast (nat5 |> NNat.toIn) --> Nothing
+    4 |> Nat.isIntAtLeast nat5 --> Nothing
 
-    1234 |> Nat.isIntAtLeast (nat5 |> NNat.toIn) --> Just (Nat 1234)
+    1234 |> Nat.isIntAtLeast nat5 --> Just (Nat 1234)
 
 -}
-isIntAtLeast : Nat (In min max) -> Int -> Maybe (Nat (Min min))
+isIntAtLeast :
+    Nat (In min max maybeN)
+    -> Int
+    -> Maybe (Nat (ValueMin min))
 isIntAtLeast minimum int =
     if int >= toInt minimum then
         Just (Nat int)

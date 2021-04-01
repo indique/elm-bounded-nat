@@ -1,34 +1,37 @@
 ## elm-bounded-nat
 
-The goal for of this library is to supply you with more type-safe natural numbers (`>= 0`).
-
-Writing
+The goal of this library is to supply you with more type-safe natural numbers (`>= 0`).
+Its types ensure that a `Nat` is in a range _at compile-time_:
 
 ```elm
-toHexChar : Nat (In min Nat15) -> Char
+toHexChar : Nat (In min Nat15 maybeN) -> Char
 ```
 
-_No number below 0 or above 15_ can be passed in as an argument!
+**No number below 0 or above 15** can be passed in as an argument!
 
-This package contains many ways to ensure that a `Nat` is in a range _at compile-time_.
+`In` only allows values that are
+- at least a _minimum_ value: `⨯[✓✓✓✓✓✓✓...`
+- you might also restrict it to be at most a _maximum_ value: `⨯⨯[✓✓✓]⨯⨯...`
 
-- `In` knows its _minimum_ value: `⨯[✓✓✓✓✓✓✓...`
-    - you might also know the _maximum_: `⨯⨯[✓✓✓]⨯⨯...`
-- `N` & `Only` know the _actual value_: `⨯✓⨯⨯⨯⨯...`
+The type of a value reflects how much you know.
+
+- `N`: exact value: `⨯✓⨯⨯⨯⨯...`
+    - (also describes the difference between 2 values)
+- `ValueIn`: between a minimum & maximum value
+- `ValueMin`: at least a minimum value
 
 Setup
 
 ```elm
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-    --In, Min, Only, N, Is, To
-import MinNat
-import InNat
-import NNat
-import NNats exposing (..) --nat0 to nat192
-
-import Nat.N.Type exposing (..)
+    --In, ValueMin, Only, N, Is, To, InValue, ValueOnly
+import TypeNats exposing (..)
     --Nat0 to Nat192 & Nat0Plus to Nat192Plus
+import NNats exposing (..) --nat0 to nat192
+import NNat
+import InNat
+import MinNat
 ```
 
 ## examples
@@ -44,16 +47,35 @@ This is common, but _the one implementing_ the function has to handle the case w
 
 ```elm
 rgbPer100 :
-    Nat (In redMin Nat100)
-    -> Nat (In greenMin Nat100)
-    -> Nat (In blueMin Nat100)
+    Nat (In redMin Nat100 redMaybeN)
+    -> Nat (In greenMin Nat100 greenMaybeN)
+    -> Nat (In blueMin Nat100 blueMaybeN)
     -> Color
 ```
 Here, _the one using_ this function must make sure to you that the numbers are actually between 0 and 100.
 
 They can prove it by
 
+- already knowing
+
+```elm
+-- the type is Nat (N Nat100 ...)
+-- so it's also between 100 and 100 (101 / 102 /...)
+nat100
+
+red =
+    rgbPer100 nat100 nat0 nat0
+    -- 👍
+```
+- checking
+
+```elm
+isUserIntANat : Int -> Maybe (Nat (ValueMin Nat0))
+isUserIntANat =
+    Nat.isIntAtLeast nat0
+```
 - clamping
+
 ```elm
 grey float =
     let
@@ -61,37 +83,12 @@ grey float =
             float
                 * 100
                 |> round
-                |> Nat.intInRange
-                    (nat0 |> NNat.toIn)
-                    (nat100 |> NNat.toIn)
+                |> Nat.intInRange nat0 nat100
     in
     rgbPer100 greyLevel greyLevel greyLevel
 ```
-- already knowing
-```elm
--- the exact value Nat (N Nat100 ...) at compile-time
-nat100
-    |> NNat.toIn
-    -- → is also in between 100 and 100 (+1 / +2 /...)
 
-red =
-    rgbPer100
-        (nat100 |> NNat.toIn)
-        (nat0 |> NNat.toIn)
-        (nat0 |> NNat.toIn)
-    -- 👍
-```
-- checking
-```elm
-isUserIntANat : Int -> Maybe (Nat (Min Nat0))
-isUserIntANat =
-    Nat.isIntAtLeast (nat0 |> NNat.toIn)
-        { equalOrGreater = Just
-        , less = \_-> Nothing
-        }
-```
-
-- There are more ways, but you get the idea 🙂.
+- There are more ways, but you get the idea 🙂
 
 &emsp;
 
@@ -111,7 +108,7 @@ You might be able to do anything with this `Int` value, but you lost useful info
 toDigit : Char -> Maybe Digit
 
 type alias Digit =
-    Nat (In Nat0 Nat9)
+    Nat (ValueIn Nat0 Nat9)
 ```
 
 &emsp;
@@ -134,19 +131,22 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here!
 
 ```elm
-factorial : Nat (In min max) -> Nat (Min Nat1)
+factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
 ```
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
 factorialHelp =
-    MinNat.isAtLeast (nat1 |> NNat.toIn)
+    MinNat.isAtLeast nat1
         { min = nat0 } -- the minimum of the x
-        { less = \_ -> nat1 |> NNat.toMin -- x < 1 ? → then 1
+        { less =
+            -- x < 1 ? → then 1
+            \_ -> nat1 |> InNat.toMin
         , equalOrGreater =
-            \atLeast1 -> -- we now know it is a Nat (Min Nat1)
+            \atLeast1 ->
+                -- a Nat (ValueMin Nat1)
                 atLeast1
-                    |> InNat.mul
-                        (factorialHelp
+                    |> MinNat.mul
+                        (factorial
                             (atLeast1 |> MinNat.subN nat1)
                             -- so we can safely subtract 1 👍
                         )
@@ -155,11 +155,11 @@ factorialHelp =
 As the minimum is allowed to be anything `>= 0`:
 ```elm
 factorial =
-    InNat.lowerMin (nat0 |> NNat.toIn)
+    InNat.lowerMin nat0
         >> factorialHelp
 ```
 
-→ `factorial (nat4 |> NNat.toMin) --> Nat 24`
+→ `factorial nat4 --> Nat 24`
 
 → There is no way to put a negative number in.
 
@@ -169,7 +169,7 @@ We can do even better!
 We know that `!19` is already bigger than the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : Nat (In min Nat18) -> Nat (Min Nat1)
+safeFactorial : Nat (In min Nat18 maybeN) -> Nat (ValueMin Nat1)
 safeFactorial =
     factorial
 ```
@@ -184,9 +184,9 @@ No extra work.
 squares2To10 =
     -- Nats from 2 to 10
     -- every Nat is In Nat2 Nat10
-    InNat.range (nat2 |> NNat.toIn) (nat10 |> NNat.toIn)
+    InNat.range nat2 nat10
         |> List.map
-            (InNat.toPower (nat2 |> NNat.toIn)
+            (InNat.toPower nat2
             -- we can't compute the exact minimum
             -- but we know its at least Nat2
             )
@@ -203,11 +203,11 @@ rgb : Nat (In redMin Nat100) -> --...
 ```
     or instead of
 ```elm
-charFromCode : Nat (Min min) -> Char
+charFromCode : Nat (ValueMin min) -> Char
 ```
-    which you should never do, allow `Nat (In min ..)` with any max to fit in as well!
+    which you should never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
 ```elm
-charFromCode : Nat (In min max) -> Char
+charFromCode : Nat (In min max maybeN) -> Char
 ```
 
 Take a look at [`elm-bounded-array`][bounded-array] to see a lot of this in action!

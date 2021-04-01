@@ -8,8 +8,8 @@ import NNat
 import NNats exposing (..)
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-import Nat.N.Type exposing (..)
 import Test exposing (Test, describe, test)
+import TypeNats exposing (..)
 
 
 suite : Test

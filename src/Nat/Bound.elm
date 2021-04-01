@@ -1,71 +1,67 @@
 module Nat.Bound exposing
     ( In
-    , Min, Infinity
     , Only
     , N, Is, To
+    , ValueMin, ValueIn, ValueOnly
     )
 
 {-|
 
 
-## In
+## function argument
 
 @docs In
-
-
-### Min
-
-@docs Min, Infinity
-
-
-### Only
 
 @docs Only
 
 
-## N
+### N
 
 @docs N, Is, To
 
--}
 
+## value / return type
 
-{-| Sometimes, you simply cannot compute a maximum.
+@docs ValueMin, ValueIn
 
-    abs : Int -> Nat (In Nat0 ??)
+`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
+but you will never need it in combination with `Nat`s.
 
-We just say the maximum value is `Infinity` and we're done.
-
-    abs : Int -> Nat (In Nat0 Infinity)
-
-A short form is [`Min`](Nat-Bound#Min)
-
-    abs : Int -> Nat (Min Nat0)
-
-Note: if you want an argument to just be at least a minimum value, do
-
-    --incomplete
-    divideBy : Nat (In (Nat1Plus minMinus1) max)
-
-So that way, both `In Nat7 Nat123` & `In Nat7 Infinity`/`Min Nat7` fit.
-
-Only **return types should contain `Infinity`**, whereas **prarameters should never contain `Infinity`.**
+@docs ValueOnly
 
 -}
-type Infinity
-    = Infinity Never
 
 
-{-| `In minimum maximum`: Somewhere within a minimum & maximum.
+{-| `ValueIn minimum maximum`: A value somewhere within a minimum & maximum. We don't know the exact value, though.
 
        ↓ minimum   ↓ maximum
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
 
-Note: maximum >= minimum for every existing `Nat (In ...)`:
+To be used as a return type, **not** as a function argument.
 
-    percent : Nat (In minimum Nat100)
+A number between 3 and 5
 
-→ `minimum <= Nat100`
+    Nat (ValueIn Nat3 (Nat5Plus a))
+
+A number, at least 5:
+
+    Nat (ValueIn Nat5 (Nat5Plus a))
+
+-}
+type alias ValueIn minimum maximum =
+    In minimum maximum {}
+
+
+{-| `In minimum maximum maybeN`: Somewhere within a minimum & maximum.
+
+       ↓ minimum   ↓ maximum
+    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
+
+Note: maximum >= minimum for every existing `Nat (In min max ...)`:
+
+    percent : Nat (In min Nat100 maybeN) -> Percent
+
+→ `min <= Nat100`
 
 If you want a number where you just care about the minimum, leave the `max` as a type _variable_.
 
@@ -74,72 +70,92 @@ If you want a number where you just care about the minimum, leave the `max` as a
 
 Any natural number:
 
-    Nat (In Nat0 max)
+    Nat (In min max maybeN)
 
 A number, at least 5:
 
-    Nat (In Nat5 max)
+    Nat (In (Nat5Plus minMinus5) max maybeN)
 
-`max` can then either be a value or [`Infinity`](Nat-Bound#Infinity).
+  - `max` could be a maximum value if there is one
+
+  - `maybeN` could contain extra information for `N ...` if the number was exact
 
 -}
-type In minimum maximum
-    = In Never
+type alias In minimum maximum maybeN =
+    { maybeN | min : minimum, max : maximum }
 
 
-{-| Sometimes, you simply cannot compute a maximum.
+{-| Only **value / return types should be `Min`**.
 
-    abs : Int -> Nat (In Nat0 ??)
+Sometimes, you simply cannot compute a maximum.
 
-We just say the maximum value is [`Infinity`](Nat-Bound#Infinity) and we're done.
+    abs : Int -> Nat (ValueIn Nat0 ??)
 
-    abs : Int -> Nat (In Nat0 Infinity)
-
-`Min` is just a shorthand.
+This is where to use `Min`.
 
     abs : Int -> Nat (Min Nat0)
 
-Note: if you want an argument to just be at least a minimum value, do
-
-    --incomplete
-    divideBy : Nat (In (Nat1Plus minMinus1) max)
-
-So that way, both `In Nat7 Nat123` & `In Nat7 Infinity`/`Min Nat7` fit.
-
-Only **return types should be `Min`**, whereas **prarameters should never be `Min`.**
+Every `Min min` is of type `In min ...`
 
 -}
-type alias Min minimum =
-    In minimum Infinity
+type alias ValueMin minimum =
+    ValueIn minimum Infinity
 
 
 {-| Just the exact number.
 
-Only useful in function annotations.
+Only useful as a function **argument** type.
 
-    byte : Arr (Only Nat8) Bit -> Byte
+Every `In NatXYZ (NatXYZPlus a) maybeN` is a `Only NatXYZ maybeN`.
+
+    byte : Arr (Only maybeN Nat8) Bit -> Byte
 
 → A given [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/) must have _exact 8_ `Bit`s.
 
-Every `In NatXYZ (NatXYZPlus a)` is also a `Only NatXYZ`, _but not the other way around_
+`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
+but you will never need it in combination with `Nat`s.
 
 -}
-type alias Only n =
-    In n n
+type alias Only n maybeN =
+    In n n maybeN
+
+
+{-| Just the exact number.
+
+Only useful as a **value & return** type.
+
+    repeatOnly :
+        Nat (Only n maybeN)
+        -> element
+        -> Arr (ValueOnly n) element
+
+→ A given [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/) must has _exactly `n`_ `element`s.
+
+`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
+but you will never need it in combination with `Nat`s.
+
+-}
+type alias ValueOnly n =
+    ValueIn n n
 
 
 {-| No special meaning.
 
     Is a To b
 
+→ distance `b - a`.W
+
 -}
 type To
     = To Never
 
 
-{-| Describe an exact value as the diffference `b - a`.
+{-| `Is a To b`: an exact value as the diffference `b - a`.
 
-    N Nat5 (Is myAge To sistersAge) (Is mothersAge To fathersAge)
+    N Nat5
+        (Nat5Plus a)
+        (Is myAge To sistersAge)
+        (Is mothersAge To fathersAge)
 
   - `myAge + 5 = sistersAge`
   - `mothersAge + 5 = fathersAge`
@@ -149,16 +165,19 @@ type Is a to b
     = Is Never
 
 
-{-| The _actual value_ is present in the type.
+{-| The most detailed description of a number at compile-time.
 
-Looking at the type
+Every `N n atLeastN ...` is of type `In n atLeastN`.
+
+Looking at the types
 
     nat0 :
-        -- natural number
         Nat
             (N
                 -- 0 is the exact value at compile time
                 Nat0
+                -- maximum possible value (anything greater 0)
+                atLeast0
                 -- 0 as a difference is a - a & b - b
                 (Is a To a)
                 (Is b To b)
@@ -167,20 +186,28 @@ Looking at the type
 An example is [`InNat.addN`](InNat#addN)
 
     addN :
-        Nat (N added (Is min To sumMin) (Is max To sumMax))
+        Nat
+            (N added atLeastAdded
+                (Is min To sumMin)
+                (Is max To sumMax
+            )
         -> Nat (In min max)
         -> Nat (In sumMin sumMax)
 
 You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
 
     addN :
-        Nat (N added (Is min To sumMin) x)
+        Nat (N added atLeastAadded (Is min To sumMin) x)
         -> Nat (Min min)
         -> Nat (Min sumMin)
 
-If you only want to ensure that it is within a minimum (& maximum), [`Min`](Nat-Bound#Min) or [`In`](Nat-Bound#In) is the right choice!
-This is the better choice for most calculations.
-
 -}
-type N n difference otherDifference
-    = N Never
+type alias N n atLeastN asADifference asAnotherDifference =
+    In
+        n
+        atLeastN
+        { n : ( asADifference, asAnotherDifference ) }
+
+
+type Infinity
+    = Infinity Never

@@ -1,19 +1,21 @@
 module NNat exposing
-    ( add1, sub1, add, sub
-    , toMin, toIn
+    ( add, sub
+    , toIn
     )
 
-{-|
+{-| Operations that only apply for `Nat (N ...)`s.
 
 
 ## modify
 
-@docs add1, sub1, add, sub
+@docs add, sub
 
 
 ## drop information
 
-@docs toMin, toIn
+@docs toIn
+
+Operations, where the maximum doesn't matter are in `MinNat`, as they apply for `Nat (ValueMin ...)`s as well.
 
 -}
 
@@ -21,44 +23,7 @@ import Internal
 import NNats exposing (..)
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-import Nat.N.Type exposing (..)
-
-
-{-| Convert an exact `Nat (N n ...)` to a `Nat (Min n)`.
-
-    nat4 |> NNat.toMin
-    --> is of type Nat (Min Nat4)
-
-There is **only 1 situation you should use this.**
-
-To make 2 `Nat`s of the same type.
-
-    [ atLeast1, NNat.toIn nat1 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (In Nat1 Infinity)`
-
-    [ atLeast1
-    , NNat.toMin nat4
-    ]
-
--}
-toMin : Nat (N n x y) -> Nat (Min n)
-toMin =
-    Internal.newRange
-
-
-{-| A `Nat (In ...)` from an exact `Nat (N n ...)`.
-
-The minimum is `n`, the maximum `>= n`.
-
--}
-toIn :
-    Nat (N n (Is a To nPlusA) x)
-    -> Nat (In n nPlusA)
-toIn =
-    Internal.newRange
+import TypeNats exposing (..)
 
 
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
@@ -83,15 +48,32 @@ This is only rarely useful, as you shouldn't
 
 (examples don't compile, just for demonstration)
 
-Using a [`Nat (In ...)`](InNat) is often the better choice.
-
 -}
 add :
-    ( Nat (N addedN (Is n To sumN) x)
-    , Nat (N addedN (Is aPlusN To aPlusSum) (Is bPlusN To bPlusSum))
+    ( Nat
+        (N
+            addedN
+            atLeastAddedN
+            (Is n To sumN)
+            (Is atLeastN To atLeastSumN)
+        )
+    , Nat
+        (N
+            addedN
+            atLeastAddedN
+            (Is aPlusN To aPlusSum)
+            (Is bPlusN To bPlusSum)
+        )
     )
-    -> Nat (N n (Is a To aPlusN) (Is b To bPlusN))
-    -> Nat (N sumN (Is a To aPlusSum) (Is b To bPlusSum))
+    -> Nat (N n atLeastN (Is a To aPlusN) (Is b To bPlusN))
+    ->
+        Nat
+            (N
+                sumN
+                atLeastSumN
+                (Is a To aPlusSum)
+                (Is b To bPlusSum)
+            )
 add nNatToAdd =
     Internal.add (nNatToAdd |> Tuple.first)
 
@@ -118,43 +100,60 @@ This is only rarely useful, as you shouldn't
 
 (examples don't compile, just for demonstration)
 
-Using a [`Nat (In ...)`](InNat) is often the better choice.
-
 -}
 sub :
-    ( Nat (N subtractedN (Is differenceN To n) x)
-    , Nat (N subtractedN (Is aPlusDifferenceN To aPlusN) (Is bPlusDifferenceN To bPlusN))
+    ( Nat
+        (N
+            subN
+            atLeastSubN
+            (Is differenceN To n)
+            (Is atLeastDifferenceN To atLeastN)
+        )
+    , Nat
+        (N
+            subN
+            atLeastSubN
+            (Is aPlusDifferenceN To aPlusN)
+            (Is bPlusDifferenceN To bPlusN)
+        )
     )
-    -> Nat (N n (Is a To aPlusN) (Is b To bPlusN))
-    -> Nat (N differenceN (Is a To aPlusDifferenceN) (Is b To bPlusDifferenceN))
+    -> Nat (N n atLeastN (Is a To aPlusN) (Is b To bPlusN))
+    ->
+        Nat
+            (N
+                differenceN
+                atLeastDifferenceN
+                (Is a To aPlusDifferenceN)
+                (Is b To bPlusDifferenceN)
+            )
 sub nNatToSubtract =
     Internal.sub (nNatToSubtract |> Tuple.first)
 
 
-{-| Short for `add ( nat1, nat1 )`. See [add](NNat#add) on how to use it properly.
--}
-add1 :
-    Nat (N n (Is a To nPlusA) (Is b To nPlusB))
-    ->
-        Nat
-            (N
-                (Nat1Plus n)
-                (Is a To (Nat1Plus nPlusA))
-                (Is b To (Nat1Plus nPlusB))
-            )
-add1 =
-    add ( nat1, nat1 )
+
+-- ## drop information
 
 
-{-| Short for `sub ( nat1, nat1 )`. See [sub](NNat#sub) on how to use it properly.
+{-| Convert it to a `Nat (ValueIn min max)`.
+
+    nat4 |> NNat.toIn
+    --> is of type Nat (ValueIn Nat4 (Nat4Plus a))
+
+There is **only 1 situation you should use this.**
+
+To make these the same type.
+
+    [ in3To10, nat3 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (ValueIn Nat3)`
+
+    [ in3To10
+    , nat3 |> NNat.toIn
+    ]
+
 -}
-sub1 :
-    Nat
-        (N
-            (Nat1Plus nMinus1)
-            (Is a To (Nat1Plus nMinus1PlusA))
-            (Is b To (Nat1Plus nMinus1PlusB))
-        )
-    -> Nat (N nMinus1 (Is a To nMinus1PlusA) (Is b To nMinus1PlusB))
-sub1 =
-    sub ( nat1, nat1 )
+toIn : Nat (In min max maybeN) -> Nat (ValueIn min max)
+toIn =
+    Internal.toIn
