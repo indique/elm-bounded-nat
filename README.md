@@ -48,11 +48,15 @@ The type
 Nat (In min Nat100 maybeN)
 ```
 is saying it wants:
-- an integer >= 0                    → `Nat ...`
-    - which is in a range               → `In ...`
-        - which can have any minimum value → `min`
-        - which is at most 100             → `Nat100`
-        - which might be exact             → `maybeN`
+
+```
+an integer >= 0                  Nat          
+  in a range                        In       
+    at least any minimum value        min   
+    at most 100                       Nat100
+    which might be exact              maybeN
+```
+
 
 They can prove it by
 
