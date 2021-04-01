@@ -315,7 +315,7 @@ nNatsModule =
                 []
                 (fqConstruct [ "Internal" ] "Nat" [ int 0 ])
           ]
-        , List.range 1 lastN
+        , List.range 1 (lastN - 1)
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
