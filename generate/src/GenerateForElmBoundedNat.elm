@@ -353,20 +353,17 @@ natNTypeModule =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown "Express exact numbers in the type."
-                    , markdown "- Describe an exact value"
-                    , code "    onlyExact1 : Nat (Only Nat1) -> Cake"
-                    , markdown "    - `takesOnlyExact1 nat10` is a compile-time error"
-                    , markdown "- Add a fixed value"
-                    , code "    add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
-                    , markdown "    - `add2 (nat2 |> InNat)` is of type `Nat (Only Nat4)`"
+                    [ markdown "Express exact natural numbers in a type."
+                    , code "onlyExact1 : Nat (Only Nat1 maybeN) -> Cake"
+                    , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
+                    , code "add2 : Nat (Only n maybeN) -> Nat (ValueOnly (Nat2Plus n))"
+                    , markdown "- `add2 nat2` is of type `Nat (ValueOnly Nat4)`"
                     , markdown "### about a big limitation"
                     , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
-                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) Is difference)"
-                    , markdown "If a type alias is not fully expanded after _192_ tries, there seems to be a hard limit"
+                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) x y)"
+                    , markdown "If a type alias is not fully expanded after ~192 tries,"
                     , markdown "- the compilation stops"
                     , markdown "- the elm-stuff can corrupt"
-                    , markdown "This is really a factor holding this package down."
                     , markdown "## at least"
                     , docTagsFrom NatNTypeAtLeast declarations
                     , markdown "## exact"

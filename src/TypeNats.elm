@@ -49,33 +49,27 @@ module TypeNats exposing
     , Nat98, Nat99
     )
 
-{-| Express exact numbers in the type.
+{-| Express exact natural numbers in a type.
 
-  - Describe an exact value
+    onlyExact1 : Nat (Only Nat1 maybeN) -> Cake
 
-        onlyExact1 : Nat (Only Nat1 maybeN) -> Cake
+- `takesOnlyExact1 nat10` is a compile-time error
 
-      - `takesOnlyExact1 nat10` is a compile-time error
+    add2 : Nat (Only n maybeN) -> Nat (ValueOnly (Nat2Plus n))
 
-  - Add a fixed value
-
-        add2 : Nat (Only n maybeN) -> Nat (ValueOnly (Nat2Plus n))
-
-      - `add2 nat2` is of type `Nat (ValueOnly Nat4)`
+- `add2 nat2` is of type `Nat (ValueOnly Nat4)`
 
 
 ### about a big limitation
 
 Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much.
 
-    compilingGetsKilled : Nat (N (Nat100Plus Nat93) Is difference)
+    compilingGetsKilled : Nat (N (Nat100Plus Nat93) x y)
 
-If a type alias is not fully expanded after _192_ tries, there seems to be a hard limit
+If a type alias is not fully expanded after ~192 tries,
 
   - the compilation stops
   - the elm-stuff can corrupt
-
-This is really a factor holding this package down.
 
 
 ## at least
