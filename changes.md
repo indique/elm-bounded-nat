@@ -19,3 +19,19 @@ Made `Min min` alias to type `In min Infinity`.
 #### 9.1.1
 
 - minor doc fix for `Nat.Bound.In`
+
+## 10.0.0
+
+`N n atLeastN ...` is now a `In n atLeastN ...`.
+
+- added `maybeN` type parameter to `In`
+- added `ValueIn`
+- renamed `Min` to `ValueMin`
+- added `ValueOnly`
+- unexposed `Infinity`
+- renamed `Nat.N.Type` to `TypeNats`
+- moved `random` into `Nat`
+- moved `range` into `Nat`
+- moved operations like `mul`, where the `max` is ignored into `MinNat`
+- renamed `dropMax` to `toMin`
+- removed `NNat.toMin`, as `dropMax` works the same
