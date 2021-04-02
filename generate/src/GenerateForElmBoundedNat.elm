@@ -8,6 +8,7 @@ Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-
 -}
 
 import Browser
+import NNats exposing (..)
 import Bytes.Encode
 import Element as Ui
 import Element.Background as UiBg
@@ -219,50 +220,35 @@ natNAnn n =
     typed "Nat" [ n ]
 
 
-nAnn :
-    Elm.CodeGen.TypeAnnotation
-    -> Elm.CodeGen.TypeAnnotation
-    -> Elm.CodeGen.TypeAnnotation
-    -> Elm.CodeGen.TypeAnnotation
-    -> Elm.CodeGen.TypeAnnotation
-nAnn a atLeastA difference otherDifference =
+nAnn : Int  -> Elm.CodeGen.TypeAnnotation
+nAnn n =
     typed "N"
-        [ a
-        , atLeastA
-        , difference
-        , otherDifference
+        [ natXAnn n
+        , typed "Is" [ typeVar "a", toAnn ]
+        , natXPlusAnn n (typeVar "a")
+        , typed "And"
+            [ typeVar "b", toAnn, natXPlusAnn n (typeVar "b")
+            ]
         ]
 
+toAnn : Elm.CodeGen.TypeAnnotation
+toAnn =
+    typed "To" []
 
-isAnn :
-    String
-    -> (Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation)
-    -> Elm.CodeGen.TypeAnnotation
-isAnn var nPlus =
-    typed "Is"
-        [ typeVar var, typed "To" [], nPlus (typeVar var)
-        ]
-
+natXAnn : Int -> Elm.CodeGen.TypeAnnotation
+natXAnn x =
+    typed ("Nat" ++ String.fromInt x) []
 
 natXPlusAnn : Int -> Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation
 natXPlusAnn x more =
-    typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
+    case x of
+        0-> more
+        _-> typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
 
 
 toIntAnn : Elm.CodeGen.TypeAnnotation
 toIntAnn =
     funAnn [ natNAnn (typeVar "n") ] intAnn
-
-
-zeroAnn : Elm.CodeGen.TypeAnnotation
-zeroAnn =
-    natNAnn
-        (nAnn
-            (typed "Nat0" [])
-            (typeVar "atLeast0")
-            (isAnn "a" identity)
-            (isAnn "b" identity)
-        )
 
 
 
@@ -272,6 +258,11 @@ zeroAnn =
 lastN : Int
 lastN =
     192
+{- can be >= 168, avoided because of performance reasons.
+-}
+lastNatN : Int
+lastNatN =
+    168
 
 viewNNatsModule : Ui.Element msg
 viewNNatsModule =
@@ -285,59 +276,40 @@ nNatsModule =
         PackageExposedModule
             { moduleComment =
                 \declarations->
-                    [ markdown "`Nat (N Nat0 ...)` to `Nat (N Nat192 ...)`."
+                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N " ++ String.fromInt lastNatN ++ " ...)`.")
+                    , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
                     , markdown "See [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NNatsValue declarations
                     ]
             }
     , imports =
-        [ importStmt [ "Nat" ] noAlias
-            (exposingExplicit [ typeOrAliasExpose "Nat" ])
-        , importStmt [ "Nat", "Bound" ] noAlias
+        [ importStmt [ "N" ] noAlias
             (exposingExplicit
-                ([ "Is", "N", "To" ]
-                    |> List.map typeOrAliasExpose
+                ([ openTypeExpose "Nat"
+                ]
+                    ++ ([ "Is", "N", "To", "And" ]
+                            |> List.map typeOrAliasExpose
+                        )
                 )
             )
-        , importStmt [ "Nat", "N", "Type" ] noAlias exposingAll
-        , importStmt [ "Internal" ] noAlias
-            (exposingExplicit [ funExpose "add1" ])
+        , importStmt [ "TypeNats" ] noAlias exposingAll
         ]
     , declarations =
-        let
-            natComment x =
-                [ markdown ("The `Nat` " ++ String.fromInt x ++ ".") ]
-        in
-        [ [ packageExposedFunDecl NNatsValue
-                (natComment 0)
-                zeroAnn
-                "nat0"
-                []
-                (fqConstruct [ "Internal" ] "Nat" [ int 0 ])
-          ]
-        , List.range 1 (lastN - 2)
+        List.range 0 lastNatN
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
-                        (natComment x)
-                        (natNAnn
-                            (nAnn
-                                (typed ("Nat" ++ String.fromInt x) [])
-                                (natXPlusAnn x (typeVar "more"))
-                                (isAnn "a" (natXPlusAnn x))
-                                (isAnn "b" (natXPlusAnn x))
-                            )
-                        )
+                        [ markdown ("The `Nat` " ++ String.fromInt x ++ ".") ]
+                        (natNAnn (nAnn x))
                         ("nat" ++ String.fromInt x)
                         []
-                        (applyBinOp
+                        (construct "Nat" [ int x ])
+                        {-(applyBinOp
                             (val ("nat" ++ String.fromInt (x - 1)))
                             piper
                             (fun "add1")
-                        )
+                        )-}
                 )
-        ]
-        |>List.concat
     }
 
 
@@ -384,19 +356,24 @@ natNTypeModule =
                 [ markdown "1 + some n, which is at least 1."
                 ]
                 "Nat1Plus"
-                [ "more" ]
-                (typed "S" [ typeVar "more" ])
+                [ "n" ]
+                (typed "S" [ typeVar "n" ])
           ]
-        , List.range 2 192
+        , List.range 2 lastN
             |> List.map
                 (\n ->
                     packageExposedAliasDecl NatNTypeAtLeast
-                        [ markdown (String.fromInt n ++ " + some n, which is at least " ++ String.fromInt n ++ ".")
+                        [ markdown
+                            (String.fromInt n
+                                ++ " + some n, which is at least "
+                                ++ String.fromInt n
+                                ++ "."
+                            )
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
-                        [ "more" ]
+                        [ "n" ]
                         (natXPlusAnn (n - 1)
-                            (typed "S" [ typeVar "more" ])
+                            (typed "S" [ typeVar "n" ])
                         )
                 )
         , [ packageExposedAliasDecl NatNTypeExact
