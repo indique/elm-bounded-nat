@@ -12,6 +12,8 @@
     - e.g. more lossy operations
     - note: `NNats` & `TypeNats` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
 
+If you have questions, don't hesitate to ask (e.g. start a discussion in github)!
+
 ### Summary Guide
 
 commits look like this:
