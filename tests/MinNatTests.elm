@@ -64,7 +64,7 @@ listLength =
             MinNat.addN nat1
                 >> MinNat.lowerMin nat0
         )
-        nat0
+        (nat0 |> InNat.toMin)
 
 
 
