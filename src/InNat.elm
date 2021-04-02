@@ -23,7 +23,7 @@ module InNat exposing
 
 ## modify
 
-@docs addN, subN, add, sub, div, subLossy, addLossy
+@docs addN, subN, add, sub, subLossy, addLossy
 
 
 ## drop information
