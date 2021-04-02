@@ -13,10 +13,10 @@ Setup
 ```elm
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-    --In, ValueMin, Only, N, Is, To, InValue, ValueOnly
+    --In, Only, N, Is, To, And, InValue, ValueOnly, ValueMin
 import TypeNats exposing (..)
     --Nat0 to Nat192 & Nat0Plus to Nat192Plus
-import NNats exposing (..) --nat0 to nat192
+import NNats exposing (..) --nat0 to nat168
 import NNat
 import InNat
 import MinNat
