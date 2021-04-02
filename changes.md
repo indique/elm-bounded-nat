@@ -2,6 +2,8 @@
 
 ## 9.0.0
 
+- added `Infinity` to say: no upper maximum
+
 Made `Min min` alias to type `In min Infinity`.
 
 - renamed module `Nat.N` to `NNat`
@@ -22,9 +24,11 @@ Made `Min min` alias to type `In min Infinity`.
 
 ## 10.0.0
 
-`N n atLeastN ...` is now a `In n atLeastN ...`.
-
 - added `maybeN` type parameter to `In`
+- `N n (Is a To nPlusA) (Is b To nPlusB)` now looks like `N n (Is a To) nPlusA (And b To nPlusB)`
+
+`N n (Is a To) nPlusA (And b To nPlusB)` is now a `In n nPlusA ...`.
+
 - added `ValueIn`
 - renamed `Min` to `ValueMin`
 - added `ValueOnly`
@@ -34,5 +38,5 @@ Made `Min min` alias to type `In min Infinity`.
 - moved `range` into `Nat`
 - moved operations like `mul`, where the `max` is ignored into `MinNat`
 - renamed `dropMax` to `toMin`
-- removed `NNat.toMin`, as `dropMax` works the same
-- removed `NNats.nat192` & `NNats.nat191`
+- removed `NNat.toMin` as `dropMax` works the same
+- removed `NNats.nat168` to `NNats.nat192` for performance reasons
