@@ -51,12 +51,12 @@ This is only rarely useful, as you shouldn't
 -}
 add :
     ( Nat
-        (N addedN is n To sumN (And atLeastN To atLeastSumN))
+        (N addedN (Is n To) sumN (And atLeastN To atLeastSumN))
     , Nat
-        (N addedN is aPlusN To aPlusSum (And bPlusN To bPlusSum))
+        (N addedN (Is aPlusN To) aPlusSum (And bPlusN To bPlusSum))
     )
-    -> Nat (N n is a To aPlusN (And b To bPlusN))
-    -> Nat (N sumN is a To aPlusSum (And b To bPlusSum))
+    -> Nat (N n (Is a To) aPlusN (And b To bPlusN))
+    -> Nat (N sumN (Is a To) aPlusSum (And b To bPlusSum))
 add nNatToAdd =
     Internal.add (nNatToAdd |> Tuple.first)
 
@@ -86,12 +86,29 @@ This is only rarely useful, as you shouldn't
 -}
 sub :
     ( Nat
-        (N subN is differenceN To n (And atLeastDifferenceN To atLeastN))
+        (N
+            subN
+            (Is differenceN To)
+            n
+            (And atLeastDifferenceN To atLeastN)
+        )
     , Nat
-        (N subN is aPlusDifferenceN To aPlusN (And bPlusDifferenceN To bPlusN))
+        (N
+            subN
+            (Is aPlusDifferenceN To)
+            aPlusN
+            (And bPlusDifferenceN To bPlusN)
+        )
     )
-    -> Nat (N n is a To aPlusN (And b To bPlusN))
-    -> Nat (N differenceN is a To aPlusDifferenceN (And b To bPlusDifferenceN))
+    -> Nat (N n (Is a To) aPlusN (And b To bPlusN))
+    ->
+        Nat
+            (N
+                differenceN
+                (Is a To)
+                aPlusDifferenceN
+                (And b To bPlusDifferenceN)
+            )
 sub nNatToSubtract =
     Internal.sub (nNatToSubtract |> Tuple.first)
 
