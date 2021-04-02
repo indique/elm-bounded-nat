@@ -50,7 +50,7 @@ import InNat
 import Internal
 import NNats exposing (..)
 import Nat exposing (Nat, toInt)
-import Nat.Bound exposing (And, In, Is, N, To, ValueIn, ValueMin)
+import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
 import TypeNats exposing (..)
 
 
@@ -70,7 +70,7 @@ If you have don't the minimum added value at hand, use [`InNat.addLossy`](InNat#
 
 -}
 add :
-    Nat (In addedMin max maybeN)
+    Nat (In addedMin addedMax maybeN)
     -> Nat (N addedMin (Is min To) sumMin x)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin sumMin)
