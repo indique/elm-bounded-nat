@@ -1,7 +1,8 @@
 {
     "type": "application",
     "source-directories": [
-        "src"
+        "src",
+        "../src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -12,6 +13,7 @@
             "elm/core": "1.0.5",
             "elm/file": "1.0.5",
             "elm/html": "1.0.0",
+            "elm/random": "1.0.0",
             "elm/time": "1.0.0",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-syntax-highlight": "3.4.0",
@@ -40,8 +42,6 @@
         "direct": {
             "elm-explorations/test": "1.2.2"
         },
-        "indirect": {
-            "elm/random": "1.0.0"
-        }
+        "indirect": {}
     }
 }

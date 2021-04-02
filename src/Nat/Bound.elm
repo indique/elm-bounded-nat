@@ -1,8 +1,9 @@
 module Nat.Bound exposing
     ( In
     , Only
-    , N, Is, To
-    , ValueMin, ValueIn, ValueOnly
+    , N, Is, To, And
+    , ValueMin, ValueIn
+    , ValueOnly
     )
 
 {-|
@@ -17,7 +18,7 @@ module Nat.Bound exposing
 
 ### N
 
-@docs N, Is, To
+@docs N, Is, To, And
 
 
 ## value / return type
@@ -30,6 +31,8 @@ but you will never need it in combination with `Nat`s.
 @docs ValueOnly
 
 -}
+
+import N as Internal
 
 
 {-| `ValueIn minimum maximum`: A value somewhere within a minimum & maximum. We don't know the exact value, though.
@@ -49,7 +52,7 @@ A number, at least 5:
 
 -}
 type alias ValueIn minimum maximum =
-    In minimum maximum {}
+    In minimum maximum NoN
 
 
 {-| `In minimum maximum maybeN`: Somewhere within a minimum & maximum.
@@ -82,7 +85,7 @@ A number, at least 5:
 
 -}
 type alias In minimum maximum maybeN =
-    { maybeN | min : minimum, max : maximum }
+    Internal.In minimum maximum maybeN
 
 
 {-| Only **value / return types should be `Min`**.
@@ -95,7 +98,7 @@ This is where to use `Min`.
 
     abs : Int -> Nat (Min Nat0)
 
-Every `Min min` is of type `In min ...`
+Every `Min min` is of type `In min ...`.
 
 -}
 type alias ValueMin minimum =
@@ -143,26 +146,41 @@ type alias ValueOnly n =
 
     Is a To b
 
-→ distance `b - a`.W
+→ distance `b - a`.
 
 -}
-type To
-    = To Never
+type alias To =
+    Internal.To
 
 
-{-| `Is a To b`: an exact value as the diffference `b - a`.
+{-| `And a To b`: an exact value as the diffference `b - a`.
 
     N Nat5
-        (Nat5Plus a)
-        (Is myAge To sistersAge)
-        (Is mothersAge To fathersAge)
+        (Is myAge To)
+        sistersAge
+        (And mothersAge To fathersAge)
 
   - `myAge + 5 = sistersAge`
   - `mothersAge + 5 = fathersAge`
 
 -}
-type Is a to b
-    = Is Never
+type alias And a to b =
+    Internal.And a to b
+
+
+{-| An exact value as a diffference.
+
+    N Nat5
+        (Is myAge To)
+        sistersAge
+        (And mothersAge To fathersAge)
+
+  - `myAge + 5 = sistersAge`
+  - `mothersAge + 5 = fathersAge`
+
+-}
+type alias Is a to =
+    Internal.Is a to
 
 
 {-| The most detailed description of a number at compile-time.
@@ -176,38 +194,38 @@ Looking at the types
             (N
                 -- 0 is the exact value at compile time
                 Nat0
-                -- maximum possible value (anything greater 0)
-                atLeast0
                 -- 0 as a difference is a - a & b - b
-                (Is a To a)
-                (Is b To b)
+                (Is a To)
+                a
+                (And b To b)
             )
 
 An example is [`InNat.addN`](InNat#addN)
 
     addN :
-        Nat
-            (N added atLeastAdded
-                (Is min To sumMin)
-                (Is max To sumMax
-            )
+        Nat (N added (Is min To) sumMin (And max To sumMax))
         -> Nat (In min max)
         -> Nat (In sumMin sumMax)
 
 You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
 
     addN :
-        Nat (N added atLeastAadded (Is min To sumMin) x)
+        Nat (N added (Is min To) sumMin x)
         -> Nat (Min min)
         -> Nat (Min sumMin)
 
 -}
-type alias N n atLeastN asADifference asAnotherDifference =
-    In
-        n
-        atLeastN
-        { n : ( asADifference, asAnotherDifference ) }
+type alias N n isATo nPlusA asAnotherDifference =
+    In n nPlusA ( isATo, asAnotherDifference )
 
 
+{-| We can't guess the highest possible number.
+-}
 type Infinity
     = Infinity Never
+
+
+{-| Not an `N ...`.
+-}
+type NoN
+    = NoN Never

@@ -35,6 +35,7 @@ module Nat exposing
 -}
 
 import Internal
+import N as Internal
 import Nat.Bound exposing (In, ValueIn, ValueMin)
 import Random
 import TypeNats exposing (..)

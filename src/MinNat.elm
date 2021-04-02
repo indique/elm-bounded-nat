@@ -50,7 +50,7 @@ import InNat
 import Internal
 import NNats exposing (..)
 import Nat exposing (Nat, toInt)
-import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
+import Nat.Bound exposing (And, In, Is, N, To, ValueIn, ValueMin)
 import TypeNats exposing (..)
 
 
@@ -71,7 +71,7 @@ If you have don't the minimum added value at hand, use [`InNat.addLossy`](InNat#
 -}
 add :
     Nat (In addedMin max maybeN)
-    -> Nat (N addedMin atLeastAddedMin (Is min To sumMin) x)
+    -> Nat (N addedMin (Is min To) sumMin x)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin sumMin)
 add inNatToAdd addedMin =
@@ -86,7 +86,7 @@ add inNatToAdd addedMin =
 
 -}
 addN :
-    Nat (N added atLeastAddded (Is min To sumMin) x)
+    Nat (N added (Is min To) sumMin x)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin sumMin)
 addN nNatToAdd =
@@ -101,7 +101,7 @@ addN nNatToAdd =
 
 -}
 subN :
-    Nat (N sub atLeastSub (Is differenceMin To min) x)
+    Nat (N sub (Is differenceMin To) min x)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin max)
 subN nNatToSubtract =
@@ -118,7 +118,7 @@ If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#s
 -}
 sub :
     Nat (In minSubbed maxSubbed subbedMaybeN)
-    -> Nat (N maxSubbed atLeastMaxSub (Is differenceMin To min) x)
+    -> Nat (N maxSubbed (Is differenceMin To) min x)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin max)
 sub inNatToSubtract maxSubtracted =
@@ -151,7 +151,7 @@ sub inNatToSubtract maxSubtracted =
 -}
 is :
     Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA) maybeN)
-    -> { min : Nat (N min triedMinus1 x y) }
+    -> { min : Nat (N min (Is minToTriedMinus1 To) triedMinus1 x) }
     ->
         { equal : () -> result
         , less : Nat (ValueIn min triedMinus1PlusA) -> result
@@ -197,8 +197,8 @@ factorial =
 
 -}
 isAtLeast :
-    Nat { min : triedMin, max : Nat1Plus triedMinMinus1PlusA, n : maybeN }
-    -> { min : Nat (N min triedMin x y) }
+    Nat (In triedMin (Nat1Plus triedMinMinus1PlusA) maybeN)
+    -> { min : Nat (N min (Is minToTriedMin To) triedMin x) }
     ->
         { less : Nat (ValueIn min triedMinMinus1PlusA) -> result
         , equalOrGreater : Nat (ValueMin triedMin) -> result
@@ -235,7 +235,7 @@ tryToGoToU18Party =
 -}
 isAtMost :
     Nat (In atMostMin atMostMinPlusA atMostMaybeN)
-    -> { min : Nat (N min atMostMin x y) }
+    -> { min : Nat (N min (Is minToAtMostMin To) atMostMin x) }
     ->
         { equalOrLess : Nat (ValueIn min atMostMinPlusA) -> result
         , greater : Nat (ValueMin atMostMin) -> result
@@ -257,14 +257,14 @@ isAtMost triedUpperLimit min cases =
 
 {-| Set the minimum lower.
 
-    [ NNat.toIn nat3, NNat.toIn nat4 ]
+    [ atLeast3, atLeast4 ]
 
 Elm complains:
 
-> But all the previous elements in the list are: `Nat (In Nat3 ...)`
+> But all the previous elements in the list are: `Nat (ValueMin Nat3)`
 
-    [ NNat.toIn nat3
-    , NNat.toIn nat4 |> InNat.lowerMin nat3
+    [ atLeast3
+    , atLeast4 |> MinNat.lowerMin nat3
     ]
 
 -}

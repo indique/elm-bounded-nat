@@ -2,8 +2,7 @@ module InNat exposing
     ( atMost
     , is, isInRange, isAtLeast, isAtMost
     , addN, subN, add, sub, subLossy, addLossy
-    , maxIs
-    , toMin
+    , maxIs, toMin
     )
 
 {-| Operations when you know the `maximum` of the `Nat (In minimum maximum ...)`.
@@ -62,7 +61,7 @@ import TypeNats exposing (..)
 -}
 atMost :
     Nat (In minNewMax newMaxPlusA newMaxMaybeN)
-    -> { min : Nat (N min minNewMax x y) }
+    -> { min : Nat (N min (Is minToMinNewMax To) minNewMax x) }
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min newMaxPlusA)
 atMost higherLimit min =
@@ -93,8 +92,23 @@ tryToVote =
 
 -}
 isAtLeast :
-    Nat (N tried (Nat1Plus triedMinus1PlusA) (Is atLeastRange To max) x)
-    -> { min : Nat (N min minPlusA (Is (Nat1Plus lessRange) To tried) y) }
+    Nat
+        (N
+            tried
+            (Is a To)
+            (Nat1Plus triedMinus1PlusA)
+            (And atLeastRange To max)
+        )
+    ->
+        { min :
+            Nat
+                (N
+                    min
+                    (Is a To)
+                    minPlusA
+                    (And (Nat1Plus lessRange) To tried)
+                )
+        }
     ->
         { less : Nat (ValueIn min triedMinus1PlusA) -> result
         , equalOrGreater : Nat (ValueIn tried max) -> result
@@ -130,8 +144,14 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    Nat (N tried triedPlusA (Is (Nat1Plus greaterRange) To max) x)
-    -> { min : Nat (N min tried y z) }
+    Nat
+        (N
+            tried
+            (Is a To)
+            triedPlusA
+            (And (Nat1Plus greaterRange) To max)
+        )
+    -> { min : Nat (N min (Is minToTried To) tried y) }
     ->
         { equalOrLess : Nat (ValueIn min triedPlusA) -> result
         , greater : Nat (ValueIn tried max) -> result
@@ -166,8 +186,14 @@ isAtMost triedUpperLimit min cases =
 
 -}
 is :
-    Nat (N tried max (Is a To (Nat1Plus triedPlusAMinus1)) x)
-    -> { min : Nat (N min tried y z) }
+    Nat
+        (N
+            tried
+            (Is triedToMax To)
+            max
+            (And a To (Nat1Plus triedPlusAMinus1))
+        )
+    -> { min : Nat (N min (Is minToTried To) tried y) }
     ->
         { equal : () -> result
         , less : Nat (ValueIn min triedPlusAMinus1) -> result
@@ -216,11 +242,23 @@ justIfBetween3And10 nat123
 -}
 isInRange :
     { first :
-        Nat (N first last (Is a To (Nat1Plus firstMinus1PlusA)) x)
+        Nat
+            (N
+                first
+                (Is firstToLast To)
+                last
+                (And a To (Nat1Plus firstMinus1PlusA))
+            )
     , last :
-        Nat (N last max (Is a To lastPlusA) y)
+        Nat
+            (N
+                last
+                (Is lastToMax To)
+                max
+                (And a To lastPlusA)
+            )
     }
-    -> { min : Nat (N min first z w) }
+    -> { min : Nat (N min (Is minToFirst To) first x) }
     ->
         { inRange : Nat (ValueIn first lastPlusA) -> result
         , less : Nat (ValueIn min firstMinus1PlusA) -> result
@@ -253,8 +291,8 @@ isInRange interval min cases =
 -}
 add :
     Nat (In addedMin addedMax addedMaybeMax)
-    -> Nat (N addedMin addedMinPlusA (Is min To sumMin) x)
-    -> Nat (N addedMax addedMaxPlusA (Is max To sumMax) y)
+    -> Nat (N addedMin (Is min To) sumMin x)
+    -> Nat (N addedMax (Is max To) sumMax y)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn sumMin sumMax)
 add inNatToAdd addedMin addedMax =
@@ -269,7 +307,7 @@ add inNatToAdd addedMin addedMax =
 
 -}
 addN :
-    Nat (N added addedPlusA (Is min To sumMin) (Is max To sumMax))
+    Nat (N added (Is min To) sumMin (And max To sumMax))
     -> Nat (In min max maybeN)
     -> Nat (ValueIn sumMin sumMax)
 addN nNatToAdd =
@@ -315,8 +353,8 @@ If you don't have both at hand, use [`subLossy`](InNat#subLossy).
 -}
 sub :
     Nat (In minSubbed maxSubbed subbedMaybeN)
-    -> Nat (N minSubbed atLeastMinSubbed (Is differenceMax To max) x)
-    -> Nat (N maxSubbed atLeastMaxSubbed (Is differenceMin To min) y)
+    -> Nat (N minSubbed (Is differenceMax To) max x)
+    -> Nat (N maxSubbed (Is differenceMin To) min y)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin differenceMax)
 sub inNatToSubtract minSubtracted maxSubtracted =
@@ -360,7 +398,7 @@ subLossy inNatToSubtract =
 
 -}
 subN :
-    Nat (N sub atLeastSub (Is differenceMin To min) (Is differenceMax To max))
+    Nat (N sub (Is differenceMin To) min (And differenceMax To max))
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin differenceMax)
 subN nNatToSubtract =
@@ -415,8 +453,8 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 
 -}
 maxIs :
-    Nat (N max atLeastMax x y)
+    Nat (N max (Is a To) maxPlusA x)
     -> Nat (In min max maybeN)
-    -> Nat (ValueIn min atLeastMax)
+    -> Nat (ValueIn min maxPlusA)
 maxIs =
     \_ -> Internal.newRange
