@@ -40,3 +40,7 @@ Made `Min min` alias to type `In min Infinity`.
 - renamed `dropMax` to `toMin`
 - removed `NNat.toMin` as `dropMax` works the same
 - removed `NNats.nat168` to `NNats.nat192` for performance reasons
+
+## 11.0.0
+
+Fixed a bug in the `MinNat.add` type. Upgrade if you can.
