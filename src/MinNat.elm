@@ -70,7 +70,7 @@ If you have don't the minimum added value at hand, use [`InNat.addLossy`](InNat#
 
 -}
 add :
-    Nat (In addedMin addedMax maybeN)
+    Nat (In addedMin addedMax addedMaybeN)
     -> Nat (N addedMin (Is min To) sumMin x)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin sumMin)
@@ -150,7 +150,7 @@ sub inNatToSubtract maxSubtracted =
 
 -}
 is :
-    Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA) maybeN)
+    Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA) triedMaybeN)
     -> { min : Nat (N min (Is minToTriedMinus1 To) triedMinus1 x) }
     ->
         { equal : () -> result
@@ -197,7 +197,7 @@ factorial =
 
 -}
 isAtLeast :
-    Nat (In triedMin (Nat1Plus triedMinMinus1PlusA) maybeN)
+    Nat (In triedMin (Nat1Plus triedMinMinus1PlusA) triedMaybeN)
     -> { min : Nat (N min (Is minToTriedMin To) triedMin x) }
     ->
         { less : Nat (ValueIn min triedMinMinus1PlusA) -> result
