@@ -1,6 +1,6 @@
 {
     "type": "package",
-    "name": "lue-bird/elm-nat-in-range",
+    "name": "indique/elm-nat-in-range",
     "summary": "natural number in a range at compile-time",
     "license": "MIT",
     "version": "13.0.0",
