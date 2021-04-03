@@ -1,6 +1,6 @@
 {
     "type": "package",
-    "name": "indique/elm-nat-in-range",
+    "name": "indique/elm-bounded-nat",
     "summary": "natural number in a range at compile-time",
     "license": "MIT",
     "version": "13.0.0",
